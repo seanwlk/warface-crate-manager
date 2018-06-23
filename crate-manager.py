@@ -101,11 +101,12 @@ while 1:
         if len(main_json['data']['user_chests']) != 0:
             for chest in main_json['data']['user_chests']:
                 if str(chest['state']) == 'new':
-                    print ("New "+chest['type']+" crate available!")
                     data_start_opening = {
                         'chest_id':chest['id']
                         }
                     req = s.post("https://wf.my.com/minigames/bp4/craft/start",data=data_start_opening)
+                    if req['state'] == "Success":
+                        print ("New "+chest['type']+" crate available!")
                 elif chest['ended_at'] < 0:
                     data_to_open = {
                         'chest_id':chest['id'],
