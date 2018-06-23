@@ -69,7 +69,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def signal_handler(signal, frame):
-    print ('\n'+bcolors.WARNING+"Absolute Power Crate Manager was interrupted!"+bcolors.ENDC)
+    print ('\n'+bcolors.WARNING+"K.I.W.I. Crate Manager was interrupted!"+bcolors.ENDC)
     sys.exit(0)
 
 def res_count():
@@ -82,7 +82,7 @@ def res_count():
     output = "\033[92m\nCurrent resources\033[0m \nLevel 1: %d | Level 2: %d | Level 3: %d | Level 4: %d | Level 5: %d \n" % (level1,level2,level3,level4,level5)
     return output
 
-print (bcolors.OKGREEN+bcolors.HEADER+"\nAbsolute Power Weapon Crafting Crate Manager"+bcolors.ENDC)
+print (bcolors.OKGREEN+bcolors.HEADER+"\nK.I.W.I. Weapon Crafting Crate Manager"+bcolors.ENDC)
 
 # LOGIN AND CHECK USER
 login()
