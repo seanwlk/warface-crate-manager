@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2018"
 __license__ = "GPL"
-__version__ = "2.0"
+__version__ = "2.1"
 __maintainer__ = "seanwlk"
 __status__ = "Beta"
 
@@ -36,7 +36,7 @@ def login():
         'Origin':'https://wf.my.com',
         'Referer':'https://wf.my.com/kiwi',
         'Upgrade-Insecure-Requests':'1',
-        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36'
         }
     login_data = {
         'email':email,
@@ -56,6 +56,10 @@ def login():
         except:
             continue
         break
+
+def get_mg_token():
+    get_token = s.get('https://wf.my.com/minigames/user/info').json()
+    s.cookies['mg_token'] = get_token['data']['token']
 
 #Class for color and text customization
 class bcolors:
@@ -101,6 +105,7 @@ while 1:
         if len(main_json['data']['user_chests']) != 0:
             for chest in main_json['data']['user_chests']:
                 if str(chest['state']) == 'new':
+                    get_mg_token()
                     data_start_opening = {
                         'chest_id':chest['id']
                         }
@@ -108,6 +113,7 @@ while 1:
                     if req['state'] == "Success":
                         print ("New "+chest['type']+" crate available!")
                 elif chest['ended_at'] < 0:
+                    get_mg_token()
                     data_to_open = {
                         'chest_id':chest['id'],
                         'paid':0
