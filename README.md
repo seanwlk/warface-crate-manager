@@ -1,14 +1,21 @@
-# K.I.W.I. Automatic Crate Manager
+# Warface Automatic Crate Manager
 Python script that automatically opens new crates for you and avoids you missclicking on wrong buttons that make you spend BattlePoints for no reason (which is the main reason this script was designed for).
+New version with GUI and simple usage for users that don't know how to setup python enviroment.
 
-# Requisites
-- Python
+# Requisites for running the non-compiled version
+- Python3
+- Tkinter
 - Python `requests` module
-- Python `json` module
-- Python `signal` module
-- Python `getpass` module
+- Python `steam` module
+- Python `lxml` module
 - 3 minutes to config
 - Brain
 
-# How
-I will not explain how to install python and how to configure the enviroment. There isn't much to say about the script, just run, login and leave it running.
+# Requisites for compiled version
+- A mouse with which you can double click the executable.
+- A keyboard with which you can type login data
+- Simply go to [Releases](https://github.com/seanwlk/warface-crate-manager/releases) and download last compiled version
+
+# Credits
+- Original project and design - [@seanwlk](https://github.com/seanwlk)
+- Steam support - [@sumfun4WF](https://github.com/sumfun4WF)
