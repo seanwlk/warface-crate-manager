@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.0"
+__version__ = "1.1"
 
 import sys
 import datetime
@@ -68,15 +68,37 @@ def crates():
        Label(crates_window, text="{type} chest - Opens in {opens}".format(type=crate['type'],opens=crate_date(crate['ended_at']))).grid(row=index,column=0,sticky = W) 
     crates_window.mainloop()
 
-def dont_look_at_me():
-    # You didn't see this
-    pass
-
 def main_app():
     def append_out_text(text):
         out_text.configure(state='normal')
         out_text.insert(END,"\n{}".format(text))
         out_text.configure(state='disabled')
+    def check_crates():
+        main_json = s.get("https://wf.my.com/minigames/craft/api/user-info").json()
+        if len(main_json['data']['user_chests']) != 0:
+            for chest in main_json['data']['user_chests']:
+                if str(chest['state']) == 'new':
+                    get_mg_token()
+                    url = "https://wf.my.com/minigames/craft/api/start"
+                    data_start_opening = {
+                        'chest_id':chest['id']
+                        }
+                    req = s.post(url,data=data_start_opening).json()
+                    if req['state'] == "Success":
+                        append_out_text("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
+                        #print("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
+                elif chest['ended_at'] < 0:
+                    get_mg_token()
+                    data_to_open = {
+                        'chest_id':chest['id'],
+                        'paid':0
+                        }
+                    url = "https://wf.my.com/minigames/craft/api/open"
+                    req = s.post(url,data=data_to_open)
+                    to_open_json = json.loads(req.text)
+                    append_out_text("{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
+                    #print("\n{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
+        app.after(30000,check_crates)
         
     print("Opening Main app")
     login_window.destroy()
@@ -96,32 +118,7 @@ def main_app():
     out_text.pack()
     user_check_json = s.get('https://wf.my.com/minigames/bp/user-info').json()
     out_text.insert(END,"Logged in as {}".format(user_check_json['data']['username']))
-    main_json = s.get("https://wf.my.com/minigames/craft/api/user-info").json()
-    
-    if len(main_json['data']['user_chests']) != 0:
-        for chest in main_json['data']['user_chests']:
-            if str(chest['state']) == 'new':
-                get_mg_token()
-                url = "https://wf.my.com/minigames/craft/api/start"
-                data_start_opening = {
-                    'chest_id':chest['id']
-                    }
-                req = s.post(url,data=data_start_opening).json()
-                if req['state'] == "Success":
-                    append_out_text("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
-                    #print("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
-            elif chest['ended_at'] < 0:
-                get_mg_token()
-                data_to_open = {
-                    'chest_id':chest['id'],
-                    'paid':0
-                    }
-                url = "https://wf.my.com/minigames/craft/api/open"
-                req = s.post(url,data=data_to_open)
-                to_open_json = json.loads(req.text)
-                append_out_text("{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
-                #print("\n{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
-    app.after(30000,dont_look_at_me)
+    app.after(30000,check_crates)
     app.mainloop()
     
 def about_window():
@@ -132,7 +129,7 @@ def about_window():
     about_app.geometry("400x200")
     Label(about_app, text="\nDesigned by").pack()
     Label(about_app, text="seanwlk",fg="Light sky blue", font=("Helvetica", 16)).pack()
-    Label(about_app, text="Version: 1.0.0").pack()
+    Label(about_app, text="Version: 1.1").pack()
     Label(about_app, text="Email: seanwlk@my.com").pack()
     Label(about_app, text="\nPowered by Python 3",font=("Calibri", 10)).pack()
 
