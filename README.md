@@ -16,6 +16,10 @@ New version with GUI and simple usage for users that don't know how to setup pyt
 - A keyboard with which you can type login data
 - Simply go to [Releases](https://github.com/seanwlk/warface-crate-manager/releases) and download last compiled version
 
+# Images
+![Login](https://i.imgur.com/XkZXzUk.png)
+![Main](https://i.imgur.com/nMiNmSD.png)
+
 # Credits
 - Original project and design - [@seanwlk](https://github.com/seanwlk)
 - Steam support - [@sumfun4WF](https://github.com/sumfun4WF)
