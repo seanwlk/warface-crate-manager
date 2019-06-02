@@ -14,7 +14,10 @@ New version with GUI and simple usage for users that don't know how to setup pyt
 # Requisites for compiled version
 - A mouse with which you can double click the executable.
 - A keyboard with which you can type login data
-- Simply go to [Releases](https://github.com/seanwlk/warface-crate-manager/releases) and download last compiled version
+- Simply go to [Releases](https://github.com/seanwlk/warface-crate-manager/releases) and download latest compiled version
+
+# Notice
+For sake of usability, the credentials will be saved in the same folder as the script under the name `creds.json` (LOCALLY). This way when you login first time you will just have to run it next time and forget about it.
 
 # Images
 ![Login](https://i.imgur.com/XkZXzUk.png)

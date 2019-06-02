@@ -3,9 +3,9 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.1"
+__version__ = "1.2"
 
-import sys
+import sys, os
 import datetime
 import signal
 import requests
@@ -129,7 +129,7 @@ def about_window():
     about_app.geometry("400x200")
     Label(about_app, text="\nDesigned by").pack()
     Label(about_app, text="seanwlk",fg="Light sky blue", font=("Helvetica", 16)).pack()
-    Label(about_app, text="Version: 1.1").pack()
+    Label(about_app, text="Version: 1.2").pack()
     Label(about_app, text="Email: seanwlk@my.com").pack()
     Label(about_app, text="\nPowered by Python 3",font=("Calibri", 10)).pack()
 
@@ -211,6 +211,12 @@ def mycom_login():
 
 ### LOGIN WINDOW
 def login(event=None):
+    CREDS = {}
+    CREDS['is_Steam'] = is_Steam.get()
+    CREDS['email'] = email.get()
+    CREDS['password'] = password.get()
+    with open('creds.json','w') as json_file:
+        json.dump(CREDS, json_file, indent=4, sort_keys=True)
     if is_Steam.get() == 0:
         print ("Login as My.com")
         mycom_login()
@@ -226,6 +232,13 @@ login_window.title("Login")
 email = StringVar() #Email variable
 password = StringVar() #Password variable
 is_Steam = IntVar()
+
+if os.path.isfile('./creds.json'):
+    with open('creds.json','r') as json_file:
+        CREDS = json.load(json_file)
+    is_Steam.set(CREDS['is_Steam'])
+    email.set(CREDS['email'])
+    password.set(CREDS['password'])
 
 # Steam true/false
 Checkbutton(login_window, text="Is Steam?", variable=is_Steam).grid(row=0,column=0,sticky = W)

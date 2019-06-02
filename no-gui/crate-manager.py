@@ -5,7 +5,7 @@ __copyright__ = "Copyright 2019"
 __license__ = "GPL"
 __version__ = "3.0"
 
-import sys
+import sys, os
 import time
 import signal
 import requests
@@ -18,20 +18,32 @@ import lxml.html
 
 s = requests.Session()
 
-while True:
-    platform = input("Which platform are you using? \n 1. My.com \n 2. Steam \n    Choice:")
-    if platform.lower()=='1':
-        is_Steam=False
-    elif platform.lower()=='2':
-        is_Steam=True
-    else:
-        continue
-    break
-
-# Login credentials request
-email = input("Email: ")
-password = getpass.getpass("Password: ")
-# Login credentials request
+if os.path.isfile('./creds.json'):
+    with open('creds.json','r') as json_file:
+        CREDS = json.load(json_file)
+    is_Steam = CREDS['is_Steam']
+    email = CREDS['email']
+    password = CREDS['password']    
+else:
+    while True:
+        platform = input("Which platform are you using? \n 1. My.com \n 2. Steam \n    Choice:")
+        if platform.lower()=='1':
+            is_Steam=False
+        elif platform.lower()=='2':
+            is_Steam=True
+        else:
+            continue
+        break
+    # Login credentials request
+    email = input("Email: ")
+    password = getpass.getpass("Password: ")
+    CREDS = {}
+    CREDS['is_Steam'] = is_Steam
+    CREDS['email'] = email
+    CREDS['password'] = password 
+    with open('creds.json','w') as json_file:
+        json.dump(CREDS, json_file, indent=4, sort_keys=True)
+    # Login credentials request
 
 def steam_login():
     # Steam login function by sumfun4WF
