@@ -3,14 +3,12 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.2"
+__version__ = "1.3"
 
 import sys, os
 import datetime
-import signal
 import requests
 import json
-import getpass
 import steam.webauth as wa
 from collections import OrderedDict
 from io import StringIO
