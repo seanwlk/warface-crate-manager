@@ -16,6 +16,7 @@ from collections import OrderedDict
 from io import StringIO
 import lxml.html
 from tkinter import * 
+from tkinter import simpledialog
 
 s = requests.Session()
 
@@ -129,7 +130,7 @@ def about_window():
     about_app.geometry("400x200")
     Label(about_app, text="\nDesigned by").pack()
     Label(about_app, text="seanwlk",fg="Light sky blue", font=("Helvetica", 16)).pack()
-    Label(about_app, text="Version: 1.2").pack()
+    Label(about_app, text="Version: {}".format(__version__)).pack()
     Label(about_app, text="Email: seanwlk@my.com").pack()
     Label(about_app, text="\nPowered by Python 3",font=("Calibri", 10)).pack()
 
@@ -138,19 +139,18 @@ def get_mg_token():
     s.cookies['mg_token'] = get_token['data']['token']
 
 def steam_login():
-    # Steam login function by sumfun4WF
+    # Steam login process by sumfun4WF
     user = wa.WebAuth(email.get(), password.get())
     try:
         user.login()
     except wa.CaptchaRequired:
-        print("Please complete the captcha: "+user.captcha_url)
-        captcha_code=input("Please input the captcha response code: ")
+        captcha_code = simpledialog.askstring("Captcha Code", "{}".format(user.captcha_url),parent=login_window)
         user.login(captcha=captcha_code)
     except wa.EmailCodeRequired:
-        email_code=input("Please input the email verification code: ")
+        email_code = simpledialog.askstring("Email Code", "CODE",parent=login_window)
         user.login(email_code=email_code)
     except wa.TwoFactorCodeRequired:
-        tfa_code=input("Please input the 2FA code: ")
+        tfa_code = simpledialog.askstring("2 Factor", "CODE",parent=login_window)
         user.login(twofactor_code=tfa_code)
     # Copy cookies to session
     s.cookies.update(user.session.cookies)
