@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.3"
+__version__ = "1.4"
 
 import sys, os
 import datetime
@@ -14,9 +14,20 @@ from collections import OrderedDict
 from io import StringIO
 import lxml.html
 from tkinter import * 
-from tkinter import simpledialog
+from tkinter import simpledialog,messagebox
 
 s = requests.Session()
+
+def check_for_updates(silent=False):
+    def latest_ver():
+        ver = requests.get("https://api.github.com/repos/seanwlk/warface-crate-manager/releases/latest").json()
+        return ver['tag_name']
+    print("Looking for udpates")
+    if __version__ != latest_ver():
+        messagebox.showwarning("New version available!","You are currently running a different version than the latest release available. Please update.")
+    else:
+        if not silent:
+            messagebox.showinfo("No updates available","You are currently running the latest version of the project.")
 
 def resources():
     print("Opening available resources window")
@@ -68,6 +79,7 @@ def crates():
     crates_window.mainloop()
 
 def main_app():
+    check_for_updates(silent=True)
     def append_out_text(text):
         out_text.configure(state='normal')
         out_text.insert(END,"\n{}".format(text))
@@ -85,7 +97,6 @@ def main_app():
                     req = s.post(url,data=data_start_opening).json()
                     if req['state'] == "Success":
                         append_out_text("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
-                        #print("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
                 elif chest['ended_at'] < 0:
                     get_mg_token()
                     data_to_open = {
@@ -96,7 +107,6 @@ def main_app():
                     req = s.post(url,data=data_to_open)
                     to_open_json = json.loads(req.text)
                     append_out_text("{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
-                    #print("\n{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
         app.after(30000,check_crates)
         
     print("Opening Main app")
@@ -110,6 +120,7 @@ def main_app():
     menubar.add_command(label="Resources", command=resources)
     menubar.add_command(label="Crates", command=crates)
     menubar.add_command(label="About", command=about_window)
+    menubar.add_command(label="Update", command=check_for_updates)
     # display the menu
     app.config(menu=menubar)
     
