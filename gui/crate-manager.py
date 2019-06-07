@@ -68,7 +68,7 @@ def resources():
     
 def crate_date(end_at):
     if end_at > 0:
-        return str(datetime.timedelta(seconds=end_at))
+        return "Opens in {}".format(str(datetime.timedelta(seconds=end_at)))
     else:
         return "Crate Open"
 
@@ -77,10 +77,24 @@ def crates():
     crates_window = Tk() 
     crates_window.title("Crates")
     crates_window.resizable(False, False)
-    crates_window.geometry("300x200")
+    crates_window.geometry("250x200")
     main_json = s.get("https://wf.my.com/minigames/craft/api/user-info").json()
+    Label(crates_window).grid(row=0,column=1,sticky = W)
+    Label(crates_window, text="Type").grid(row=0,column=1,sticky = N) 
+    Label(crates_window, text="Status").grid(row=0,column=2,sticky = N) 
     for index,crate in enumerate(main_json['data']['user_chests']):
-       Label(crates_window, text="{type} chest - Opens in {opens}".format(type=crate['type'],opens=crate_date(crate['ended_at']))).grid(row=index,column=0,sticky = W) 
+        square_icon = Canvas(crates_window, width=15, height=15)
+        square_icon.grid(row=index+1,column=0,sticky = W)
+        if crate['type'] == "platinum":
+            square_icon.create_rectangle(0, 0, 15, 15, fill="black")
+        elif crate['type'] == "gold":
+            square_icon.create_rectangle(0, 0, 15, 15, fill="yellow")
+        elif crate['type'] == "silver":
+            square_icon.create_rectangle(0, 0, 15, 15, fill="silver")
+        elif crate['type'] == "common":
+            square_icon.create_rectangle(0, 0, 15, 15, fill="white")
+        Label(crates_window, text="{}".format(crate['type'].capitalize())).grid(row=index+1,column=1,sticky = W) 
+        Label(crates_window, text="{}".format(crate_date(crate['ended_at']))).grid(row=index+1,column=2,sticky = W) 
     crates_window.mainloop()
 
 def main_app():
