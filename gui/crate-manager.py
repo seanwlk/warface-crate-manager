@@ -14,7 +14,7 @@ from collections import OrderedDict
 from io import StringIO
 import lxml.html
 from tkinter import * 
-from tkinter import simpledialog,messagebox
+from tkinter import ttk,simpledialog,messagebox
 
 s = requests.Session()
 
@@ -34,30 +34,35 @@ def resources():
     resources_window = Tk() 
     resources_window.title("Resources")
     resources_window.resizable(False, False)
-    resources_window.geometry("300x300")
+    resources_window.geometry("225x130")
     main_json = s.get("https://wf.my.com/minigames/craft/api/user-info").json()
-    Label(resources_window, text="Current Resources").grid(row=0,column=2,sticky = W)
     level1=main_json['data']['user_resources'][0]['amount']
     level2=main_json['data']['user_resources'][1]['amount']
     level3=main_json['data']['user_resources'][2]['amount']
     level4=main_json['data']['user_resources'][3]['amount']
     level5=main_json['data']['user_resources'][4]['amount']
-    Label(resources_window, text="Level 1: {}".format(level1)).grid(row=1,column=2,sticky = W)
-    Label(resources_window, text="Level 2: {}".format(level2)).grid(row=2,column=2,sticky = W)
-    Label(resources_window, text="Level 3: {}".format(level3)).grid(row=3,column=2,sticky = W)
-    Label(resources_window, text="Level 4: {}".format(level4)).grid(row=4,column=2,sticky = W)
-    Label(resources_window, text="Level 5: {}".format(level5)).grid(row=5,column=2,sticky = W)
-    Label(resources_window).grid(row=6,column=2)
-    Label(resources_window, text="If all converted").grid(row=7,column=2,sticky = W)
-    Label(resources_window, text="Level 1: {}".format(level1%50)).grid(row=8,column=2,sticky = W)
+    
+    current_res_labels = ttk.Labelframe(resources_window, text='Current Resources')
+    current_res_labels.grid(row=0,column=0,sticky = W)
+    Label(current_res_labels, text="Level 1: {}".format(level1)).grid(row=0,column=0,sticky = W)
+    Label(current_res_labels, text="Level 2: {}".format(level2)).grid(row=1,column=0,sticky = W)
+    Label(current_res_labels, text="Level 3: {}".format(level3)).grid(row=2,column=0,sticky = W)
+    Label(current_res_labels, text="Level 4: {}".format(level4)).grid(row=3,column=0,sticky = W)
+    Label(current_res_labels, text="Level 5: {}".format(level5)).grid(row=4,column=0,sticky = W)
+    
+    Label(resources_window).grid(row=0,column=1,sticky = W) #Space
+    
+    converted_res = ttk.Labelframe(resources_window, text='If all converted')
+    converted_res.grid(row=0,column=2,sticky = W)
+    Label(converted_res, text="Level 1: {}".format(level1%50)).grid(row=0,column=0,sticky = W)
     level2 = level2 + int(level1/50)
-    Label(resources_window, text="Level 2: {}".format(level2%50)).grid(row=9,column=2,sticky = W)
+    Label(converted_res, text="Level 2: {}".format(level2%50)).grid(row=1,column=0,sticky = W)
     level3 = level3 + int(level2/50)
-    Label(resources_window, text="Level 3: {}".format(level3%35)).grid(row=10,column=2,sticky = W)
+    Label(converted_res, text="Level 3: {}".format(level3%35)).grid(row=2,column=0,sticky = W)
     level4 = level4 + int(level3/35)
-    Label(resources_window, text="Level 4: {}".format(level4%25)).grid(row=11,column=2,sticky = W)
+    Label(converted_res, text="Level 4: {}".format(level4%25)).grid(row=3,column=0,sticky = W)
     level5 = level5 + int(level4/25)
-    Label(resources_window, text="Level 5: {}".format(level5)).grid(row=12,column=2,sticky = W)
+    Label(converted_res, text="Level 5: {}".format(level5)).grid(row=4,column=0,sticky = W)
     
     resources_window.mainloop()
     
