@@ -205,7 +205,7 @@ def go_profile():
     levelup = ttk.Progressbar(progressFrame,orient=HORIZONTAL,length=200,mode='determinate')
     levelup.grid(row=0,column=0,sticky = W)
     levelup['value'] = level_progress(uprofile['data']['exp'],uprofile['data']['prev_exp'],uprofile['data']['next_exp']) 
-    Label(progressFrame, text="{prev} / {next}".format(prev=uprofile['data']['prev_exp'],next=uprofile['data']['next_exp'])).grid(row=0,column=1,sticky = W)
+    Label(progressFrame, text="{exp} / {next}".format(exp=uprofile['data']['exp'],next=uprofile['data']['next_exp'])).grid(row=0,column=1,sticky = W)
     
     Label(go_profile_wind, text="Battlepoints: {}".format(uprofile['data']['points'])).grid(row=2,sticky = W)
     Label(go_profile_wind, text="Total missions completed: {}".format(uprofile['data']['progress'])).grid(row=3,sticky = W)
