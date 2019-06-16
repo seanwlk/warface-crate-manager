@@ -19,8 +19,12 @@ New version with GUI and simple usage for users that don't know how to setup pyt
 # Notice
 For sake of usability, the credentials will be saved in the same folder as the script under the name `creds.json` (LOCALLY). This way when you login first time you will just have to run it next time and forget about it.
 
+# Mail.ru login support
+The login works but it may end up failing if you try to login multiple times requesting you to complete a captcha. I believe that it's IP block based from what i could see. 
+Just open your browser and go to wf.mail.ru, it will redirect you to the mail.ru verification captcha, just complete it once or twice and you will be able to login again.
+
 # Images
-![Login](https://i.imgur.com/XkZXzUk.png)
+![Login](https://i.imgur.com/5TTsDfF.png)
 ![Main](https://i.imgur.com/nMiNmSD.png)
 
 # Credits
