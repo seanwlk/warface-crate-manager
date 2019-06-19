@@ -244,7 +244,7 @@ def main_app():
                         }
                     req = s.post(url,data=data_start_opening).json()
                     if req['state'] == "Success":
-                        append_out_text("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
+                        append_out_text("[{actiontime}] New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
                 elif chest['ended_at'] < 0:
                     get_mg_token()
                     data_to_open = {
@@ -254,7 +254,7 @@ def main_app():
                     url = "https://{}/minigames/craft/api/open".format(base_url)
                     req = s.post(url,data=data_to_open)
                     to_open_json = json.loads(req.text)
-                    append_out_text("{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
+                    append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
         app.after(30000,check_crates)
         
     print("Opening Main app")

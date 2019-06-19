@@ -179,7 +179,7 @@ while 1:
                         }
                     req = s.post(url,data=data_start_opening).json()
                     if req['state'] == "Success":
-                        print ("New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
+                        print ("[{actiontime}] New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
                 elif chest['ended_at'] < 0:
                     get_mg_token()
                     data_to_open = {
@@ -189,7 +189,7 @@ while 1:
                     url = "https://{}/minigames/craft/api/open".format(base_url)
                     req = s.post(url,data=data_to_open)
                     to_open_json = json.loads(req.text)
-                    print ("\n{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
+                    print ("\n[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
     except (KeyError,ValueError,TypeError,requests.exceptions.ChunkedEncodingError,json.decoder.JSONDecodeError,requests.exceptions.ConnectionError):
         login()
         pass
