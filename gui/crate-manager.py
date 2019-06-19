@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.5"
+__version__ = "1.6"
 
 import sys, os
 import datetime,time
@@ -161,7 +161,9 @@ def weekly_challenges():
             taskFrame = Frame(weekFrame,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
             taskFrame.pack(fill="x", expand=True)
             Label(taskFrame,text="{}".format(task['descr'])).grid(row=0,sticky = W)
-            Label(taskFrame,text="EXP: {exp} | Skip cost: {skip} | To do in one game: {one_game}".format(exp=task['exp'], skip=task['skip_cost'], one_game = "YES" if task['is_one_game'] == 1 else "NO")).grid(row=1,sticky = W)
+            Label(taskFrame,text="Progress: {progress}/{target} | EXP: {exp} | Skip cost: {skip} | To do in one game: {one_game}".format(progress=task['progress'],target=task['target_count'],exp=task['exp'], skip=task['skip_cost'], one_game = "YES" if task['is_one_game'] == 1 else "NO")).grid(row=1,sticky = W)
+            if task['status'] == "completed":
+                Label(taskFrame,text="\u2713",fg="green",font=("Arial", 18)).grid(row=0,rowspan=2, column=1,sticky = E)
         tabDisplayer.add(weekFrame,text="Week {}".format(i))
 
 

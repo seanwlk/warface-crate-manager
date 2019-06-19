@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "3.0"
+__version__ = "3.1"
 
 import sys, os
 import time
@@ -26,11 +26,13 @@ if os.path.isfile('./creds.json'):
     password = CREDS['password']    
 else:
     while True:
-        platform = input("Which platform are you using? \n 1. My.com \n 2. Steam \n    Choice:")
+        platform = input("Which platform are you using? \n 1. My.com \n 2. Steam \n 3. Mail.ru    Choice:")
         if platform.lower()=='1':
-            is_Steam=False
+            is_Steam=1
         elif platform.lower()=='2':
-            is_Steam=True
+            is_Steam=2
+        elif platform.lower()=='3':
+            is_Steam=3
         else:
             continue
         break
@@ -115,14 +117,36 @@ def mycom_login():
             continue
         break
 
+def mailru_login():
+    # <3 Harmdhast
+    payload = {
+        'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Encoding':'gzip, deflate, br',
+        'Accept-Language':'en-US,en;q=0.9,it;q=0.8',
+        'Connection':'keep-alive',
+        'Content-Type':'application/x-www-form-urlencoded',
+        'Cookie':'s=dpr=1; amc_lang=en_US; t_0=1; _ym_isad=1',
+        'DNT':'1',
+        'Origin':'https://wf.mail.ru',
+        'Referer':'https://wf.mail.ru/battlepass',
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+        }
+    s.get('https://auth.mail.ru/cgi-bin/auth?Login={mail}&Password={pwd}&FakeAuthPage=https%3A%2F%2Fwf.mail.ru%2Fauth'.format(mail=email,pwd=password))
+
 def login():
-    if is_Steam:
-        steam_login()
-    else:
+    global base_url
+    if is_Steam == 1:
+        base_url = "wf.my.com"
         mycom_login()
+    elif is_Steam == 2:
+        base_url = "wf.my.com"
+        steam_login()
+    elif is_Steam == 3:
+        base_url = "wf.mail.ru"
+        mailru_login()
 
 def get_mg_token():
-    get_token = s.get('https://wf.my.com/minigames/user/info').json()
+    get_token = s.get('https://{}/minigames/user/info'.format(base_url)).json()
     s.cookies['mg_token'] = get_token['data']['token']
 
 def signal_handler(signal, frame):
@@ -133,7 +157,7 @@ print ("\n\033[95mWarface Crate Manager\033[0m")
 
 # LOGIN AND CHECK USER
 login()
-user_check_json = s.get('https://wf.my.com/minigames/bp/user-info').json()
+user_check_json = s.get('https://{}/minigames/bp/user-info'.format(base_url)).json()
 try:
     print ("Logged in as {}".format(user_check_json['data']['username']))
 except KeyError:
@@ -144,12 +168,12 @@ except KeyError:
 signal.signal(signal.SIGINT, signal_handler)
 while 1:
     try:
-        main_json = s.get("https://wf.my.com/minigames/craft/api/user-info").json()
+        main_json = s.get("https://{}/minigames/craft/api/user-info".format(base_url)).json()
         if len(main_json['data']['user_chests']) != 0:
             for chest in main_json['data']['user_chests']:
                 if str(chest['state']) == 'new':
                     get_mg_token()
-                    url = "https://wf.my.com/minigames/craft/api/start"
+                    url = "https://{}/minigames/craft/api/start".format(base_url)
                     data_start_opening = {
                         'chest_id':chest['id']
                         }
@@ -162,7 +186,7 @@ while 1:
                         'chest_id':chest['id'],
                         'paid':0
                         }
-                    url = "https://wf.my.com/minigames/craft/api/open"
+                    url = "https://{}/minigames/craft/api/open".format(base_url)
                     req = s.post(url,data=data_to_open)
                     to_open_json = json.loads(req.text)
                     print ("\n{chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
