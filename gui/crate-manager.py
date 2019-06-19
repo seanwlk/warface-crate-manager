@@ -152,8 +152,10 @@ def weekly_challenges():
     
     tabDisplayer = ttk.Notebook(weekly_challenges_window)
     tabDisplayer.pack(fill="x", expand=True)
-    for i in range(1,13):
+    for i in range(1,20):
         req = s.get("https://{url}/minigames/bp5/tasks/week-tasks?week={week}".format(url=base_url,week=i)).json()
+        if len(req['data']) == 0:
+            break
         weekFrame = Frame(tabDisplayer)
         weekFrame.pack(fill="x", expand=True)
         Label(weekFrame,text="Available from {}".format(time.ctime(req['data'][0]['started_at']))).pack()
@@ -175,8 +177,10 @@ def undone_missions():
     # main frame that contains multiple generated mission frames
     missionList = VerticalScrolledFrame(todo_missions)
     missionList.pack(fill="x", expand=True)
-    for i in range(1,13):
+    for i in range(1,20):
         req = s.get("https://{url}/minigames/bp5/tasks/week-tasks?week={week}".format(url=base_url,week=i)).json()
+        if len(req['data']) == 0:
+            break
         for task in req['data']:
             if task['status'] == "progress" and time.time() > task['started_at']:
                 missionFrame = Frame(missionList,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
