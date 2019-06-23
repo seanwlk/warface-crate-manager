@@ -225,6 +225,8 @@ def go_profile():
     missionFrame.grid(row=10,sticky = W)
     Label(missionFrame,text="{}".format(daily_task['data']['descr'])).grid(row=1,sticky = W)
     Label(missionFrame,text="Progress: {progress}/{target} | EXP: {exp} | To do in one game: {one_game}".format(exp=daily_task['data']['exp'], progress=daily_task['data']['progress'],target=daily_task['data']['target_count'], one_game = "YES" if daily_task['data']['is_one_game'] == 1 else "NO")).grid(row=2,sticky = W)
+    if daily_task['data']['progress'] >= daily_task['data']['target_count']:
+        Label(missionFrame,text="\u2713",fg="green",font=("Arial", 18)).grid(row=1,rowspan=2, column=1,sticky = E)
 
 def main_app():
     check_for_updates(silent=True)
