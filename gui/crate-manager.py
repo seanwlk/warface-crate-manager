@@ -92,7 +92,7 @@ def crates():
         elif crate['type'] == "common":
             square_icon.create_rectangle(0, 0, 15, 15, fill="white")
         Label(crates_window, text="{}".format(crate['type'].capitalize())).grid(row=index+1,column=1,sticky = W) 
-        Label(crates_window, text="{}".format(crate_date(crate['ended_at']))).grid(row=index+1,column=2,sticky = W) 
+        Label(crates_window, text="{}".format("New" if crate['state'] == "new" else crate_date(crate['ended_at']))).grid(row=index+1,column=2,sticky = W) 
 
 class VerticalScrolledFrame:
     def __init__(self, master, **kwargs):
