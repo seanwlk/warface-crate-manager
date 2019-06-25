@@ -404,24 +404,34 @@ def op_lang(*args):
 ### LOGIN WINDOW
 def login(event=None):
     global base_url
-    CREDS = {}
-    CREDS['is_Steam'] = is_Steam.get()
-    CREDS['email'] = email.get()
-    CREDS['password'] = password.get()
+    CREDS['LoginType'] = LoginType.get()
+    CREDS[LoginType.get()] = {}
+    CREDS[LoginType.get()]['email'] = email.get()
+    CREDS[LoginType.get()]['password'] = password.get()
     with open('creds.json','w') as json_file:
         json.dump(CREDS, json_file, indent=4, sort_keys=True)
-    if is_Steam.get() == 1:
+    if LoginType.get() == "mycom":
         print ("Login as My.com")
         base_url = "wf.my.com"
         mycom_login()
-    elif is_Steam.get() == 2:
+    elif LoginType.get() == "steam":
         print ("Login as Steam")
         base_url = "wf.my.com"
         steam_login()
-    elif is_Steam.get() == 3:
+    elif LoginType.get() == "mailru":
         print ("Login as Mail.ru")
         base_url = "wf.mail.ru"
         mailru_login()
+
+def loginSelected(*args):
+    try:    
+        email.set(CREDS[LoginType.get()]['email'])
+    except KeyError:
+        email.set("")
+    try:
+        password.set(CREDS[LoginType.get()]['password'])
+    except KeyError:
+        password.set("")
 
 login_window = Tk()   
 login_window.resizable(False, False)
@@ -430,23 +440,35 @@ login_window.title("Login")
 
 email = StringVar() #Email variable
 password = StringVar() #Password variable
-is_Steam = IntVar() # Called is_Steam but actually used to select login type, will leave like this to not break old releases
+LoginType = StringVar() # select login service, at the time only steam, mycom and mailru
 
 if os.path.isfile('./creds.json'):
     with open('creds.json','r') as json_file:
         CREDS = json.load(json_file)
-    is_Steam.set(CREDS['is_Steam'])
-    email.set(CREDS['email'])
-    password.set(CREDS['password'])
-
+    try:
+        LoginType.set(CREDS['LoginType'])
+    except KeyError:
+        LoginType.set("mycom")
+    try:
+        email.set(CREDS[CREDS['LoginType']]['email'])
+    except KeyError: 
+        email.set("")
+    try:
+        password.set(CREDS[CREDS['LoginType']]['password'])
+    except KeyError:
+        password.set("")
+else:
+    CREDS = {}
+    LoginType.set("mycom")
+    
 login_selector = Frame(login_window)
 login_selector.grid(row=0, columnspan=3,sticky = W)
 # Mycom true/false
-Radiobutton(login_selector, text="My.com", variable=is_Steam, value=1).grid(row=0,column=0,sticky = W)
+Radiobutton(login_selector, text="My.com", variable=LoginType, value="mycom", command=loginSelected).grid(row=0,column=0,sticky = W)
 # Steam true/false
-Radiobutton(login_selector, text="Steam", variable=is_Steam, value=2).grid(row=0,column=1,sticky = W)
+Radiobutton(login_selector, text="Steam", variable=LoginType, value="steam", command=loginSelected).grid(row=0,column=1,sticky = W)
 # Mail.ru true/false
-Radiobutton(login_selector, text="Mail.ru", variable=is_Steam, value=3).grid(row=0,column=2,sticky = W)
+Radiobutton(login_selector, text="Mail.ru", variable=LoginType, value="mailru", command=loginSelected).grid(row=0,column=2,sticky = W)
 
 # Email field 
 Label(login_window, text="Email").grid(row=1,column=0,sticky = W)
