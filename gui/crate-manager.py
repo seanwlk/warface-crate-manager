@@ -304,7 +304,7 @@ def get_mg_token():
 
 def steam_login():
     # Steam login process by sumfun4WF
-    user = wa.WebAuth(email.get(), password.get())
+    user = wa.MobileWebAuth(email.get(), password.get()) #MobileAuth should keep session alive
     try:
         user.login()
     except wa.CaptchaRequired:
@@ -316,6 +316,10 @@ def steam_login():
     except wa.TwoFactorCodeRequired:
         tfa_code = simpledialog.askstring("2 Factor", "CODE",parent=login_window)
         user.login(twofactor_code=tfa_code)
+    # Save auth token for later session restore
+    with open('creds.json','w') as json_file:
+        CREDS['steam']['auth_token'] = user.oauth_token
+        json.dump(CREDS, json_file, indent=4, sort_keys=True)
     # Copy cookies to session
     s.cookies.update(user.session.cookies)
     while True:
