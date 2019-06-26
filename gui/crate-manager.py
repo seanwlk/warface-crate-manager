@@ -204,6 +204,7 @@ def go_profile():
         personal_crates.geometry("400x200")
         cratescroll = VerticalScrolledFrame(personal_crates)
         uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
+        get_mg_token()
         response = s.post("https://{}/minigames/bp6/personal-box/open".format(base_url), data={'count' : uprofile['data']['personal_boxes']}).json()
         for item in response['data']:
             itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
@@ -211,11 +212,13 @@ def go_profile():
             Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
             Label(itemFrame,text="{}".format(item['duration_type'])).grid(row=1,sticky = W) # Not knowing the different response structures i'll leave it like this for now
     def start_mission(missionType):
+        get_mg_token()
         req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":missionType}).json()
         messagebox.showinfo("Starting {} research".format("Short" if missionType == 1 else "Long"), "{} starting.".format(req['state']))
         go_profile_wind.destroy()
         go_profile()
     def get_research_reward(missionType):
+        get_mg_token()
         req = s.post("https://{}/minigames/bp6/research/take-rewards".format(base_url),data={"research_id":missionType}).json()
         rewards = {
             "currency" : "Resources",
