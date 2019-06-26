@@ -210,7 +210,7 @@ def go_profile():
             itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
             itemFrame.pack(fill="x", expand=True)
             Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
-            Label(itemFrame,text="{}".format(item['duration_type'])).grid(row=1,sticky = W) # Not knowing the different response structures i'll leave it like this for now
+            Label(itemFrame,text="{}".format("Permanent" if item['duration_type'] == "permanent" else "{0} {1}".format(item['duration'],item['duration_type']))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
     def start_mission(missionType):
         get_mg_token()
         req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":missionType}).json()
