@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.6"
+__version__ = "1.7"
 
 import sys, os
 import datetime,time
@@ -197,12 +197,49 @@ def go_profile():
         exp -= prev
         # next : 200 = exp : x
         return int((200*exp) / next)
-
+    def open_crates():
+        personal_crates =  Tk()
+        personal_crates.title("Opening Personal Crates")
+        personal_crates.resizable(False, True)
+        personal_crates.geometry("400x200")
+        cratescroll = VerticalScrolledFrame(personal_crates)
+        uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
+        response = s.post("https://{}/minigames/bp6/personal-box/open".format(base_url), data={'count' : uprofile['data']['personal_boxes']}).json()
+        for item in response['data']:
+            itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
+            itemFrame.pack(fill="x", expand=True)
+            Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
+            Label(itemFrame,text="{}".format(item['duration_type'])).grid(row=1,sticky = W) # Not knowing the different response structures i'll leave it like this for now
+    def start_mission(missionType):
+        req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":missionType}).json()
+        messagebox.showinfo("Starting {} research".format("Short" if missionType == 1 else "Long"), "{} starting.".format(req['state']))
+        go_profile_wind.destroy()
+        go_profile()
+    def get_research_reward(missionType):
+        req = s.post("https://{}/minigames/bp6/research/take-rewards".format(base_url),data={"research_id":missionType}).json()
+        rewards = {
+            "currency" : "Resources",
+            "experience" : "Experience",
+            "chest_key" : "Crate key",
+            "personal_box" : "Personal crate"
+        }
+        if not len(req['data']) == 0:
+            for reward in req['data']:
+                if "reward" in reward and (reward['reward']['type'] == "currency" or reward['reward']['type'] == "experience"):
+                    messagebox.showinfo("Collecting research rewards", "You got {amount} {what}".format(amount=reward['reward']['count'],what=rewards[reward['reward']['type']]))
+                elif "reward" in reward and (reward['reward']['type'] == "chest_key" or reward['reward']['type'] == "personal_box"):
+                    messagebox.showinfo("Collecting research rewards", "You got a {what}".format(what=rewards[reward['reward']['type']]))
+            go_profile_wind.destroy()
+            go_profile()
+        else:
+            messagebox.showinfo("Collecting research rewards", "Mission Failed.")
+            go_profile_wind.destroy()
+            go_profile()
     print("Opening global operation profile")
     go_profile_wind = Tk()
     go_profile_wind.title("Armageddon Profile")
 
-    go_profile_wind.geometry("400x300")
+    go_profile_wind.geometry("400x350")
     uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
     daily_task = s.get("https://{}/minigames/bp5/daily/user-task".format(base_url)).json()
     Label(go_profile_wind, text="Level: {}".format(uprofile['data']['level'])).grid(row=0,sticky = W)
@@ -212,13 +249,39 @@ def go_profile():
     levelup.grid(row=0,column=0,sticky = W)
     levelup['value'] = level_progress(uprofile['data']['exp'],uprofile['data']['prev_exp'],uprofile['data']['next_exp']) 
     Label(progressFrame, text="{exp} / {next}".format(exp=uprofile['data']['exp'],next=uprofile['data']['next_exp'])).grid(row=0,column=1,sticky = W)
-    
+
     Label(go_profile_wind, text="Battlepoints: {}".format(uprofile['data']['points'])).grid(row=2,sticky = W)
     Label(go_profile_wind, text="Total missions completed: {}".format(uprofile['data']['progress'])).grid(row=3,sticky = W)
-    Label(go_profile_wind, text="Colony resources: {}".format(uprofile['data']['colony_resources'])).grid(row=4,sticky = W)
-    Label(go_profile_wind, text="Personal boxes: {}".format(uprofile['data']['personal_boxes'])).grid(row=5,sticky = W)
+
+    perboxes = Frame(go_profile_wind)
+    perboxes.grid(row=4,sticky = W)
+    Label(perboxes, text="Personal crates: {}".format(uprofile['data']['personal_boxes'])).grid(row=0,sticky = W)
+    if uprofile['data']['personal_boxes'] > 0:
+        Button(perboxes, bd =2,text='Open all crates',command=open_crates).grid(row=1,sticky=W)
+
+    Label(go_profile_wind, text="Colony resources: {}".format(uprofile['data']['colony_resources'])).grid(row=5,sticky = W)
     Label(go_profile_wind, text="Base level: {}".format(uprofile['data']['base_level'])).grid(row=6,sticky = W)
-    Label(go_profile_wind, text="Base missions ends in: {}".format("No mission in progress" if uprofile['data']['base_mission'] == None else datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=7,sticky = W)
+    base_mission = Frame(go_profile_wind)
+    base_mission.grid(row=7,sticky = W)
+    which_mission = s.get("https://{}/minigames/bp6/research/list".format(base_url)).json()
+    flag_counter = 0
+    for research in which_mission['data']:
+        if "time_left" in research:
+            if research['time_left'] == 0:
+                Label(base_mission,text="Your research finished, collect reward.").grid(row=0,sticky=W)
+                missionType = research['id']
+                Button(base_mission, bd =2,text='Collect',command=lambda: get_research_reward(missionType)).grid(row=1,sticky=W)
+            elif research['time_left'] != 0:
+                Label(base_mission,text="Base missions ends in: {}".format(datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=0,sticky=W)
+        else:
+            flag_counter+=1
+    if flag_counter == 2:
+        energy_req=s.get("https://{}/minigames/bp6/colony/upgrades".format(base_url)).json()
+        Label(base_mission,text="No research in progress").grid(row=0,sticky=W)
+        Label(base_mission,text="Energy: {energy}/{max_energy}".format(energy=energy_req['data']['energy']['energy'],max_energy=energy_req['data']['energy']['energy_limit'])).grid(row=1,sticky=W)
+        Button(base_mission, bd =2,text='Start short research',command=lambda: start_mission(1)).grid(row=2,column=0,sticky=W)
+        Button(base_mission, bd =2,text='Start long research',command=lambda: start_mission(2)).grid(row=2,column=1,sticky=W)
+        
     Label(go_profile_wind).grid(row=8,sticky = W) # Free line
     Label(go_profile_wind, text="Daily mission").grid(row=9,sticky = W)
     missionFrame = Frame(go_profile_wind,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
@@ -491,10 +554,9 @@ go_language.current(0)
 go_language.grid(row=3,column=1,sticky = W) # Global operation language
 
 # Login button
-submit = Button(login_window, bd =2,text='Login',command=login).grid(row=4,column=1)  
+submit = Button(login_window, bd =2,text='Login',command=login).grid(row=4,column=1)
 login_window.bind('<Return>',login)
 
-login_window.mainloop() 
+login_window.mainloop()
 
-### END LOGIN WINDOW     
-  
+### END LOGIN WINDOW
