@@ -211,10 +211,12 @@ def go_profile():
             itemFrame.pack(fill="x", expand=True)
             Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
             Label(itemFrame,text="{}".format("Permanent" if item['duration_type'] == "permanent" else "{0} {1}".format(item['duration'],item['duration_type']))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
-    def start_mission(missionType):
+    def start_mission(missionType,which_mission):
         get_mg_token()
-        req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":missionType}).json()
-        messagebox.showinfo("Starting {} research".format("Short" if missionType == 1 else "Long"), "{} starting.".format(req['state']))
+        for research in which_mission['data']:
+            if research['type'] == missionType:
+                req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":research['id']}).json()
+        messagebox.showinfo("Starting {} research".format(missionType), "{} starting.".format(req['state']))
         go_profile_wind.destroy()
         go_profile()
     def get_research_reward(missionType):
@@ -282,8 +284,8 @@ def go_profile():
         energy_req=s.get("https://{}/minigames/bp6/colony/upgrades".format(base_url)).json()
         Label(base_mission,text="No research in progress").grid(row=0,sticky=W)
         Label(base_mission,text="Energy: {energy}/{max_energy}".format(energy=energy_req['data']['energy']['energy'],max_energy=energy_req['data']['energy']['energy_limit'])).grid(row=1,sticky=W)
-        Button(base_mission, bd =2,text='Start short research',command=lambda: start_mission(1)).grid(row=2,column=0,sticky=W)
-        Button(base_mission, bd =2,text='Start long research',command=lambda: start_mission(2)).grid(row=2,column=1,sticky=W)
+        Button(base_mission, bd =2,text='Start short research',command=lambda: start_mission("short",which_mission)).grid(row=2,column=0,sticky=W)
+        Button(base_mission, bd =2,text='Start long research',command=lambda: start_mission("long",which_mission)).grid(row=2,column=1,sticky=W)
         
     Label(go_profile_wind).grid(row=8,sticky = W) # Free line
     Label(go_profile_wind, text="Daily mission").grid(row=9,sticky = W)
