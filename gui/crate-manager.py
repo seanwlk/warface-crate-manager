@@ -13,7 +13,7 @@ import steam.webauth as wa
 from collections import OrderedDict
 from io import StringIO
 import lxml.html
-from tkinter import * 
+from tkinter import *
 from tkinter import ttk,simpledialog,messagebox
 
 s = requests.Session()
@@ -23,7 +23,7 @@ def check_for_updates(silent=False):
         ver = requests.get("https://api.github.com/repos/seanwlk/warface-crate-manager/releases/latest").json()
         return ver['tag_name']
     print("Looking for udpates")
-    if __version__ != latest_ver():
+    if __version__ < latest_ver():
         messagebox.showwarning("New version available!","You are currently running a different version than the latest release available. Please update.")
     else:
         if not silent:
@@ -31,7 +31,7 @@ def check_for_updates(silent=False):
 
 def resources():
     print("Opening available resources window")
-    resources_window = Tk() 
+    resources_window = Tk()
     resources_window.title("Resources")
     resources_window.resizable(False, False)
     resources_window.geometry("225x130")
@@ -41,7 +41,7 @@ def resources():
     level3=main_json['data']['user_resources'][2]['amount']
     level4=main_json['data']['user_resources'][3]['amount']
     level5=main_json['data']['user_resources'][4]['amount']
-    
+
     current_res_labels = ttk.Labelframe(resources_window, text='Current Resources')
     current_res_labels.grid(row=0,column=0,sticky = W)
     Label(current_res_labels, text="Level 1: {}".format(level1)).grid(row=0,column=0,sticky = W)
@@ -49,9 +49,9 @@ def resources():
     Label(current_res_labels, text="Level 3: {}".format(level3)).grid(row=2,column=0,sticky = W)
     Label(current_res_labels, text="Level 4: {}".format(level4)).grid(row=3,column=0,sticky = W)
     Label(current_res_labels, text="Level 5: {}".format(level5)).grid(row=4,column=0,sticky = W)
-    
+
     Label(resources_window).grid(row=0,column=1,sticky = W) #Space
-    
+
     converted_res = ttk.Labelframe(resources_window, text='If all converted')
     converted_res.grid(row=0,column=2,sticky = W)
     Label(converted_res, text="Level 1: {}".format(level1%50)).grid(row=0,column=0,sticky = W)
@@ -63,7 +63,7 @@ def resources():
     Label(converted_res, text="Level 4: {}".format(level4%25)).grid(row=3,column=0,sticky = W)
     level5 = level5 + int(level4/25)
     Label(converted_res, text="Level 5: {}".format(level5)).grid(row=4,column=0,sticky = W)
-    
+
 def crate_date(end_at):
     if end_at > 0:
         return "Opens in {}".format(str(datetime.timedelta(seconds=end_at)))
@@ -72,14 +72,14 @@ def crate_date(end_at):
 
 def crates():
     print("Opening available crates window")
-    crates_window = Tk() 
+    crates_window = Tk()
     crates_window.title("Crates")
     crates_window.resizable(False, False)
     crates_window.geometry("250x200")
     main_json = s.get("https://{}/minigames/craft/api/user-info".format(base_url)).json()
     Label(crates_window).grid(row=0,column=1,sticky = W)
-    Label(crates_window, text="Type").grid(row=0,column=1,sticky = N) 
-    Label(crates_window, text="Status").grid(row=0,column=2,sticky = N) 
+    Label(crates_window, text="Type").grid(row=0,column=1,sticky = N)
+    Label(crates_window, text="Status").grid(row=0,column=2,sticky = N)
     for index,crate in enumerate(main_json['data']['user_chests']):
         square_icon = Canvas(crates_window, width=15, height=15)
         square_icon.grid(row=index+1,column=0,sticky = W)
@@ -91,8 +91,8 @@ def crates():
             square_icon.create_rectangle(0, 0, 15, 15, fill="silver")
         elif crate['type'] == "common":
             square_icon.create_rectangle(0, 0, 15, 15, fill="white")
-        Label(crates_window, text="{}".format(crate['type'].capitalize())).grid(row=index+1,column=1,sticky = W) 
-        Label(crates_window, text="{}".format("New" if crate['state'] == "new" else crate_date(crate['ended_at']))).grid(row=index+1,column=2,sticky = W) 
+        Label(crates_window, text="{}".format(crate['type'].capitalize())).grid(row=index+1,column=1,sticky = W)
+        Label(crates_window, text="{}".format("New" if crate['state'] == "new" else crate_date(crate['ended_at']))).grid(row=index+1,column=2,sticky = W)
 
 class VerticalScrolledFrame:
     def __init__(self, master, **kwargs):
@@ -145,11 +145,11 @@ class VerticalScrolledFrame:
 
 def weekly_challenges():
     print("Opening weekly challenges window")
-    weekly_challenges_window = Tk() 
+    weekly_challenges_window = Tk()
     weekly_challenges_window.title("Armageddon missions to complete")
     weekly_challenges_window.resizable(False, True)
     weekly_challenges_window.geometry("800x550")
-    
+
     tabDisplayer = ttk.Notebook(weekly_challenges_window)
     tabDisplayer.pack(fill="x", expand=True)
     for i in range(1,20):
@@ -171,7 +171,7 @@ def weekly_challenges():
 
 def undone_missions():
     print("Opening undone missions window")
-    todo_missions = Tk() 
+    todo_missions = Tk()
     todo_missions.title("Armageddon missions to complete")
     todo_missions.geometry("800x400")
     # main frame that contains multiple generated mission frames
@@ -188,7 +188,7 @@ def undone_missions():
                 Label(missionFrame,text="Week {}".format(i)).grid(row=0,sticky = W)
                 Label(missionFrame,text="{}".format(task['descr'])).grid(row=1,sticky = W)
                 Label(missionFrame,text="Progress: {progress}/{target} | EXP: {exp} | Skip cost: {skip} | To do in one game: {one_game}".format(exp=task['exp'], skip=task['skip_cost'], progress=task['progress'],target=task['target_count'], one_game = "YES" if task['is_one_game'] == 1 else "NO")).grid(row=2,sticky = W)
-     
+
     missionList.pack(side = LEFT, fill = BOTH)
 
 def go_profile():
@@ -252,7 +252,7 @@ def go_profile():
     progressFrame.grid(row=1,sticky = W)
     levelup = ttk.Progressbar(progressFrame,orient=HORIZONTAL,length=200,mode='determinate')
     levelup.grid(row=0,column=0,sticky = W)
-    levelup['value'] = level_progress(uprofile['data']['exp'],uprofile['data']['prev_exp'],uprofile['data']['next_exp']) 
+    levelup['value'] = level_progress(uprofile['data']['exp'],uprofile['data']['prev_exp'],uprofile['data']['next_exp'])
     Label(progressFrame, text="{exp} / {next}".format(exp=uprofile['data']['exp'],next=uprofile['data']['next_exp'])).grid(row=0,column=1,sticky = W)
 
     Label(go_profile_wind, text="Battlepoints: {}".format(uprofile['data']['points'])).grid(row=2,sticky = W)
@@ -286,7 +286,7 @@ def go_profile():
         Label(base_mission,text="Energy: {energy}/{max_energy}".format(energy=energy_req['data']['energy']['energy'],max_energy=energy_req['data']['energy']['energy_limit'])).grid(row=1,sticky=W)
         Button(base_mission, bd =2,text='Start short research',command=lambda: start_mission("short",which_mission)).grid(row=2,column=0,sticky=W)
         Button(base_mission, bd =2,text='Start long research',command=lambda: start_mission("long",which_mission)).grid(row=2,column=1,sticky=W)
-        
+
     Label(go_profile_wind).grid(row=8,sticky = W) # Free line
     Label(go_profile_wind, text="Daily mission").grid(row=9,sticky = W)
     missionFrame = Frame(go_profile_wind,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
@@ -326,11 +326,11 @@ def main_app():
                     to_open_json = json.loads(req.text)
                     append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
         app.after(30000,check_crates)
-        
+
     print("Opening Main app")
     login_window.destroy()
     user_check_json = s.get('https://{}/minigames/bp/user-info'.format(base_url)).json()
-    app = Tk() 
+    app = Tk()
     app.title("Warface Crate Manager - {}".format(user_check_json['data']['username']))
     app.resizable(False, False)
     app.geometry("700x400")
@@ -346,14 +346,14 @@ def main_app():
     menubar.add_command(label="Update", command=check_for_updates)
     # display the menu
     app.config(menu=menubar)
-    
+
     out_text = Text(app,  width=85)
     out_text.pack()
     user_check_json = s.get('https://{}/minigames/bp/user-info'.format(base_url)).json()
     out_text.insert(END,"Logged in as {}".format(user_check_json['data']['username']))
     app.after(30000,check_crates)
     app.mainloop()
-    
+
 def about_window():
     print("Opening About window")
     about_app = Tk()
@@ -411,7 +411,7 @@ def steam_login():
             continue
         break
     main_app()
-    
+
 def mycom_login():
     payload = {
         'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -436,7 +436,7 @@ def mycom_login():
         try:
             s.post('https://auth-ac.my.com/auth',headers=payload,data=login_data)
             s.get('https://auth-ac.my.com/sdc?from=https%3A%2F%2Fwf.my.com')
-            s.get('https://wf.my.com/')  
+            s.get('https://wf.my.com/')
             get_token = s.get('https://wf.my.com/minigames/user/info').json()
             s.cookies['mg_token'] = get_token['data']['token']
             s.cookies['cur_language'] = op_lang()
@@ -444,7 +444,7 @@ def mycom_login():
             continue
         break
     main_app()
-    
+
 def mailru_login():
     # <3 Harmdhast
     payload = {
@@ -461,7 +461,7 @@ def mailru_login():
         }
     s.get('https://auth.mail.ru/cgi-bin/auth?Login={mail}&Password={pwd}&FakeAuthPage=https%3A%2F%2Fwf.mail.ru%2Fauth'.format(mail=email.get(),pwd=password.get()))
     main_app()
-    
+
 def op_lang(*args):
     langs={
         "English" : "en",
@@ -496,7 +496,7 @@ def login(event=None):
         mailru_login()
 
 def loginSelected(*args):
-    try:    
+    try:
         email.set(CREDS[LoginType.get()]['email'])
     except KeyError:
         email.set("")
@@ -505,7 +505,7 @@ def loginSelected(*args):
     except KeyError:
         password.set("")
 
-login_window = Tk()   
+login_window = Tk()
 login_window.resizable(False, False)
 login_window.geometry("350x120")
 login_window.title("Login")
@@ -523,7 +523,7 @@ if os.path.isfile('./creds.json'):
         LoginType.set("mycom")
     try:
         email.set(CREDS[CREDS['LoginType']]['email'])
-    except KeyError: 
+    except KeyError:
         email.set("")
     try:
         password.set(CREDS[CREDS['LoginType']]['password'])
@@ -532,7 +532,7 @@ if os.path.isfile('./creds.json'):
 else:
     CREDS = {}
     LoginType.set("mycom")
-    
+
 login_selector = Frame(login_window)
 login_selector.grid(row=0, columnspan=3,sticky = W)
 # Mycom true/false
@@ -542,13 +542,13 @@ Radiobutton(login_selector, text="Steam", variable=LoginType, value="steam", com
 # Mail.ru true/false
 Radiobutton(login_selector, text="Mail.ru", variable=LoginType, value="mailru", command=loginSelected).grid(row=0,column=2,sticky = W)
 
-# Email field 
+# Email field
 Label(login_window, text="Email").grid(row=1,column=0,sticky = W)
 emailEntry = Entry(login_window, textvariable=email, width=40)
 emailEntry.grid(row=1,column=1,sticky = W)
 emailEntry.focus()
 
-# Password field 
+# Password field
 Label(login_window, text="Password").grid(row=2,column=0,sticky = W)
 passEntry = Entry(login_window, textvariable=password, show='*')
 passEntry.grid(row=2,column=1,sticky = W)
