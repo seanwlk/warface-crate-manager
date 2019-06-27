@@ -203,6 +203,7 @@ def go_profile():
         personal_crates.resizable(False, True)
         personal_crates.geometry("400x200")
         cratescroll = VerticalScrolledFrame(personal_crates)
+        cratescroll.pack(fill="x", expand=True)
         uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
         get_mg_token()
         response = s.post("https://{}/minigames/bp6/personal-box/open".format(base_url), data={'count' : uprofile['data']['personal_boxes']}).json()
@@ -210,7 +211,8 @@ def go_profile():
             itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
             itemFrame.pack(fill="x", expand=True)
             Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
-            Label(itemFrame,text="{}".format("Permanent" if item['duration_type'] == "permanent" else "{0} {1}".format(item['duration'],item['duration_type']))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
+            Label(itemFrame,text="{}".format("Permanent" if item['item']['duration_type'] == "permanent" else "{0} {1}".format(item['item']['duration'],item['item']['duration_type']))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
+
     def start_mission(missionType,which_mission):
         get_mg_token()
         for research in which_mission['data']:
