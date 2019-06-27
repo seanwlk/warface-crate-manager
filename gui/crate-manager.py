@@ -271,7 +271,6 @@ def go_profile():
     base_mission = Frame(go_profile_wind)
     base_mission.grid(row=7,sticky = W)
     which_mission = s.get("https://{}/minigames/bp6/research/list".format(base_url)).json()
-    flag_counter = 0
     for research in which_mission['data']:
         if "time_left" in research:
             if research['time_left'] == 0:
@@ -280,9 +279,7 @@ def go_profile():
                 Button(base_mission, bd =2,text='Collect',command=lambda: get_research_reward(missionType)).grid(row=1,sticky=W)
             elif research['time_left'] != 0:
                 Label(base_mission,text="Base missions ends in: {}".format(datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=0,sticky=W)
-        else:
-            flag_counter+=1
-    if flag_counter == 2:
+    if "time_left" not in str(which_mission['data']): # No hate for this pls
         energy_req=s.get("https://{}/minigames/bp6/colony/upgrades".format(base_url)).json()
         Label(base_mission,text="No research in progress").grid(row=0,sticky=W)
         Label(base_mission,text="Energy: {energy}/{max_energy}".format(energy=energy_req['data']['energy']['energy'],max_energy=energy_req['data']['energy']['energy_limit'])).grid(row=1,sticky=W)
