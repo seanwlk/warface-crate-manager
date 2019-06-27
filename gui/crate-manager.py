@@ -211,7 +211,7 @@ def go_profile():
             itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
             itemFrame.pack(fill="x", expand=True)
             Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
-            Label(itemFrame,text="{}".format("Permanent" if item['item']['duration_type'] == "permanent" else "{0} {1}".format(item['item']['duration'],item['item']['duration_type']))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
+            Label(itemFrame,text="{}".format("Permanent" if 'permanent' in item['item'] else ("Amount: {}".format(item['item']['count']) if 'consumable' in item['item'] else "{0} {1}".format(item['item']['duration'],item['item']['duration_type']) ))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
 
     def start_mission(missionType,which_mission):
         get_mg_token()
