@@ -26,17 +26,17 @@ The login works but it may end up failing if you try to login multiple times req
 Just open your browser and go to wf.mail.ru, it will redirect you to the mail.ru verification captcha, just complete it once or twice and you will be able to login again.
 
 # Images
-####Login
+#### Login
 ![Login](https://i.imgur.com/5TTsDfF.png)
-####Crate opening logs
+#### Crate opening logs
 ![Main](https://i.imgur.com/gLjcwhC.png)
-####Current Crates
+#### Current Crates
 ![Crates](https://i.imgur.com/g9DChMx.png)
-####Resource viewer
+#### Resource viewer
 ![Resources](https://i.imgur.com/aJY43Id.png)
-####Armageddon profile
+#### Armageddon profile
 ![Profile](https://i.imgur.com/umQHMsP.png)
-####Armageddon week viewer
+#### Armageddon week viewer
 ![Weeks](https://i.imgur.com/uq7G5Uf.png)
 
 # Credits
