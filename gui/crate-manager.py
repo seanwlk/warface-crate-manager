@@ -213,12 +213,15 @@ def go_profile():
             Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
             Label(itemFrame,text="{}".format("Permanent" if 'permanent' in item['item'] else ("Amount: {}".format(item['item']['count']) if 'consumable' in item['item'] else "{0} {1}".format(item['item']['duration'],item['item']['duration_type']) ))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
 
-    def start_mission(missionType,which_mission):
+    def start_mission(missionType,which_mission,energy):
         get_mg_token()
         for research in which_mission['data']:
             if research['type'] == missionType:
-                req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":research['id']}).json()
-        messagebox.showinfo("Starting {} research".format(missionType), "{} starting.".format(req['state']))
+                if energy >= research['requirements']['energy']:
+                    req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":research['id']}).json()
+                    messagebox.showinfo("Starting {} research".format(missionType), "{} starting.".format(req['state']))
+                else:
+                    messagebox.showinfo("Starting {} research".format(missionType), "Not enough energy to start this mission. \nYour energy: {energy}\nRequired: {required}".format(energy=energy,required=research['requirements']['energy']))
         go_profile_wind.destroy()
         go_profile()
     def get_research_reward(missionType):
@@ -271,20 +274,21 @@ def go_profile():
     base_mission = Frame(go_profile_wind)
     base_mission.grid(row=7,sticky = W)
     which_mission = s.get("https://{}/minigames/bp6/research/list".format(base_url)).json()
-    for research in which_mission['data']:
-        if "time_left" in research:
-            if research['time_left'] == 0:
-                Label(base_mission,text="Your research finished, collect reward.").grid(row=0,sticky=W)
-                missionType = research['id']
-                Button(base_mission, bd =2,text='Collect',command=lambda: get_research_reward(missionType)).grid(row=1,sticky=W)
-            elif research['time_left'] != 0:
-                Label(base_mission,text="Base missions ends in: {}".format(datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=0,sticky=W)
     if "time_left" not in str(which_mission['data']): # No hate for this pls
         energy_req=s.get("https://{}/minigames/bp6/colony/upgrades".format(base_url)).json()
         Label(base_mission,text="No research in progress").grid(row=0,sticky=W)
         Label(base_mission,text="Energy: {energy}/{max_energy}".format(energy=energy_req['data']['energy']['energy'],max_energy=energy_req['data']['energy']['energy_limit'])).grid(row=1,sticky=W)
-        Button(base_mission, bd =2,text='Start short research',command=lambda: start_mission("short",which_mission)).grid(row=2,column=0,sticky=W)
-        Button(base_mission, bd =2,text='Start long research',command=lambda: start_mission("long",which_mission)).grid(row=2,column=1,sticky=W)
+        Button(base_mission, bd =2,text='Start short research',command=lambda: start_mission("short",which_mission,energy_req['data']['energy']['energy'])).grid(row=2,column=0,sticky=W)
+        Button(base_mission, bd =2,text='Start long research',command=lambda: start_mission("long",which_mission,energy_req['data']['energy']['energy'])).grid(row=2,column=1,sticky=W)
+    else:
+        for research in which_mission['data']:
+            if 'time_left' in research:
+                if research['time_left'] == 0:
+                    Label(base_mission,text="Your research finished, collect reward.").grid(row=0,sticky=W)
+                    missionType = research['id']
+                    Button(base_mission, bd =2,text='Collect',command=lambda: get_research_reward(missionType)).grid(row=1,sticky=W)
+                elif research['time_left'] != 0:
+                    Label(base_mission,text="Base missions ends in: {}".format(datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=0,sticky=W)
 
     Label(go_profile_wind).grid(row=8,sticky = W) # Free line
     Label(go_profile_wind, text="Daily mission").grid(row=9,sticky = W)
