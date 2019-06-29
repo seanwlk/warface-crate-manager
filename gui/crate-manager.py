@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.7"
+__version__ = "1.8"
 
 import sys, os
 import datetime,time

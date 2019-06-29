@@ -41,4 +41,4 @@ Just open your browser and go to wf.mail.ru, it will redirect you to the mail.ru
 
 # Credits
 - Original project and design - [@seanwlk](https://github.com/seanwlk)
-- Steam support - [@sumfun4WF](https://github.com/sumfun4WF)
+- Steam support - [@sumfun4WF](https://github.com/sumfun4WF) / [@harmdhast](https://github.com/harmdhast)
