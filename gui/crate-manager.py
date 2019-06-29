@@ -10,6 +10,8 @@ import datetime,time
 import requests
 import json
 import steam.webauth as wa
+import steam.steamid as sid
+import steam.util.web as sweb
 from collections import OrderedDict
 from io import StringIO
 import lxml.html
@@ -373,26 +375,60 @@ def get_mg_token():
     get_token = s.get('https://{}/minigames/user/info'.format(base_url)).json()
     s.cookies['mg_token'] = get_token['data']['token']
 
+def steam_oAuthLogin(steamguard, token):
+    steamguard = steamguard.split("||")
+    steamid = sid.SteamID(steamguard[0])
+
+    response = s.post('https://api.steampowered.com/IMobileAuthService/GetWGToken/v1/', data={'access_token': token}).json()['response']
+
+    # No token in response
+    if not 'token' in response or not 'token_secure' in response:
+        return False
+
+    # Build cookie list
+    cookies = {
+        'steamLogin': str("{id}||{token}".format(id=steamid, token=response['token'])),
+        'steamLoginSecure': str("{id}||{token}".format(id=steamid, token=response['token_secure'])),
+        'steamMachineAuth' + str(steamid): steamguard[1],
+        'sessionid': sweb.generate_session_id()
+    }
+
+    # Create cookie jar
+    jar = requests.cookies.RequestsCookieJar()
+    for cookie in cookies:
+        jar.set(cookie, cookies[cookie], domain='steamcommunity.com', path='/')
+
+    return jar
+
 def steam_login():
-    # Steam login process by sumfun4WF
-    user = wa.MobileWebAuth(email.get(), password.get()) #MobileAuth should keep session alive
-    try:
-        user.login()
-    except wa.CaptchaRequired:
-        captcha_code = simpledialog.askstring("Captcha Code", "{}".format(user.captcha_url),parent=login_window)
-        user.login(captcha=captcha_code)
-    except wa.EmailCodeRequired:
-        email_code = simpledialog.askstring("Email Code", "CODE",parent=login_window)
-        user.login(email_code=email_code)
-    except wa.TwoFactorCodeRequired:
-        tfa_code = simpledialog.askstring("2 Factor", "CODE",parent=login_window)
-        user.login(twofactor_code=tfa_code)
-    # Save auth token for later session restore
-    with open('creds.json','w') as json_file:
-        CREDS['steam']['auth_token'] = user.oauth_token
-        json.dump(CREDS, json_file, indent=4, sort_keys=True)
-    # Copy cookies to session
-    s.cookies.update(user.session.cookies)
+    # Steam login process by sumfun4WF & Harmdhast
+    if 'steam' in CREDS:
+        # Relog using saved tokens
+        if 'auth_token' in CREDS["steam"] and 'steamguard_token' in CREDS["steam"]:
+            authcookies = steam_oAuthLogin(CREDS['steam']['steamguard_token'], CREDS['steam']['auth_token'])
+            s.cookies.update(authcookies)
+
+    if not 'sessionid' in s.cookies.get_dict():
+        user = wa.MobileWebAuth(email.get(), password.get()) #MobileAuth should keep session alive
+        try:
+            user.login()
+        except wa.CaptchaRequired:
+            captcha_code = simpledialog.askstring("Captcha Code", "{}".format(user.captcha_url),parent=login_window)
+            user.login(captcha=captcha_code)
+        except wa.EmailCodeRequired:
+            email_code = simpledialog.askstring("Email Code", "CODE",parent=login_window)
+            user.login(email_code=email_code)
+        except wa.TwoFactorCodeRequired:
+            tfa_code = simpledialog.askstring("2 Factor", "CODE",parent=login_window)
+            user.login(twofactor_code=tfa_code)
+        # Save auth token for later session restore
+        with open('creds.json','w') as json_file:
+            CREDS['steam']['auth_token'] = user.oauth_token
+            CREDS['steam']['steamguard_token'] = "{id}||{token}".format(id=user.steam_id.as_64, token=user.session.cookies.get_dict()["steamMachineAuth{id}".format(id=user.steam_id.as_64)])
+            json.dump(CREDS, json_file, indent=4, sort_keys=True)
+        # Copy cookies to session
+        s.cookies.update(user.session.cookies)
+
     while True:
         try:
             entrance=s.get('https://auth-ac.my.com/social/steam?continue=https://account.my.com/social_back/?continue=https://wf.my.com/en/&failure=https://account.my.com/social_back/?soc_error=1&continue=https://wf.my.com/en/')
@@ -480,7 +516,13 @@ def op_lang(*args):
 def login(event=None):
     global base_url
     CREDS['LoginType'] = LoginType.get()
-    CREDS[LoginType.get()] = {}
+    # Create LoginType key if it doesn't exist
+    if not LoginType.get() in CREDS:
+        CREDS[LoginType.get()] = {}
+    # Reset saved tokens if username changes
+    if LoginType.get() == "steam" and 'email' in CREDS['steam']:
+        if not CREDS['steam']['email'] == email.get():
+            CREDS[LoginType.get()] = {}
     CREDS[LoginType.get()]['email'] = email.get()
     CREDS[LoginType.get()]['password'] = password.get()
     with open('creds.json','w') as json_file:
