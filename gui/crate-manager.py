@@ -3,7 +3,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.8"
+__version__ = "1.81"
 
 import sys, os
 import datetime,time
@@ -226,6 +226,18 @@ def go_profile():
                     messagebox.showinfo("Starting {} research".format(missionType), "Not enough energy to start this mission. \nYour energy: {energy}\nRequired: {required}".format(energy=energy,required=research['requirements']['energy']))
         go_profile_wind.destroy()
         go_profile()
+
+    def upgrade_base():
+        to_upgrade = s.get("https://{}/minigames/bp6/colony/upgrades".format(base_url)).json()
+        user_response = messagebox.askquestion('Base upgrade','Are you sure you want to upgrade base?\nRequirements\n{bp} BP\n{res} Resources'.format(bp=to_upgrade['data']['next_level']['battle_points'],res=to_upgrade['data']['next_level']['resources']),icon = 'warning')
+        if user_response == "yes":
+            get_mg_token()
+            req = s.post("https://{}/minigames/bp6/colony/unlock-level".format(base_url)).json()
+            print(str(req))
+            messagebox.showinfo("Base upgrade", "{} upgrading.".format(req['state']))
+        go_profile_wind.destroy()
+        go_profile()
+
     def get_research_reward(missionType):
         get_mg_token()
         req = s.post("https://{}/minigames/bp6/research/take-rewards".format(base_url),data={"research_id":missionType}).json()
@@ -251,7 +263,7 @@ def go_profile():
     go_profile_wind = Tk()
     go_profile_wind.title("Armageddon Profile")
 
-    go_profile_wind.geometry("400x350")
+    go_profile_wind.geometry("400x360")
     uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
     daily_task = s.get("https://{}/minigames/bp5/daily/user-task".format(base_url)).json()
     Label(go_profile_wind, text="Level: {}".format(uprofile['data']['level'])).grid(row=0,sticky = W)
@@ -272,7 +284,11 @@ def go_profile():
         Button(perboxes, bd =2,text='Open all crates',command=open_crates).grid(row=1,sticky=W)
 
     Label(go_profile_wind, text="Colony resources: {}".format(uprofile['data']['colony_resources'])).grid(row=5,sticky = W)
-    Label(go_profile_wind, text="Base level: {}".format(uprofile['data']['base_level'])).grid(row=6,sticky = W)
+    baseFrame = Frame(go_profile_wind)
+    baseFrame.grid(row=6,sticky = W)
+    Label(baseFrame, text="Base level: {}".format(uprofile['data']['base_level'])).grid(row=0,sticky = W)
+    Button(baseFrame, bd=1,text='Upgrade base',command=upgrade_base).grid(row=1,sticky=W)
+
     base_mission = Frame(go_profile_wind)
     base_mission.grid(row=7,sticky = W)
     which_mission = s.get("https://{}/minigames/bp6/research/list".format(base_url)).json()
