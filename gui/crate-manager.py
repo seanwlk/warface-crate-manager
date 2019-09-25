@@ -1,9 +1,10 @@
  #!/usr/bin/env python3
+ # -*- coding: utf-8 -*-
 
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.81"
+__version__ = "1.9"
 
 import sys, os
 import datetime,time
@@ -148,7 +149,7 @@ class VerticalScrolledFrame:
 def weekly_challenges():
     print("Opening weekly challenges window")
     weekly_challenges_window = Tk()
-    weekly_challenges_window.title("Armageddon missions to complete")
+    weekly_challenges_window.title("Berserk missions to complete")
     weekly_challenges_window.resizable(False, True)
     weekly_challenges_window.geometry("800x550")
 
@@ -174,7 +175,7 @@ def weekly_challenges():
 def undone_missions():
     print("Opening undone missions window")
     todo_missions = Tk()
-    todo_missions.title("Armageddon missions to complete")
+    todo_missions.title("Berserk missions to complete")
     todo_missions.geometry("800x400")
     # main frame that contains multiple generated mission frames
     missionList = VerticalScrolledFrame(todo_missions)
@@ -208,12 +209,16 @@ def go_profile():
         cratescroll.pack(fill="x", expand=True)
         uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
         get_mg_token()
-        response = s.post("https://{}/minigames/bp6/personal-box/open".format(base_url), data={'count' : uprofile['data']['personal_boxes']}).json()
-        for item in response['data']:
+        response = s.post("https://{}/minigames/personal_box/api/open".format(base_url), data={'count' : uprofile['data']['personal_boxes']}).json()
+        for item in response['data']['rewards']:
             itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
             itemFrame.pack(fill="x", expand=True)
             Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
-            Label(itemFrame,text="{}".format("Permanent" if 'permanent' in item['item'] else ("Amount: {}".format(item['item']['count']) if 'consumable' in item['item'] else "{0} {1}".format(item['item']['duration'],item['item']['duration_type']) ))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
+            try:
+                Label(itemFrame,text="{}".format("Permanent" if 'permanent' in item['item'] else ("Amount: {}".format(item['item']['count']) if 'consumable' in item['item'] else "{0} {1}".format(item['item']['duration'],item['item']['duration_type']) ))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
+            except:
+                print(str(item)) # Mainly for debug since it was failing with Armageddon under  certain conditions
+                pass
 
     def start_mission(missionType,which_mission,energy):
         get_mg_token()
@@ -261,7 +266,7 @@ def go_profile():
             go_profile()
     print("Opening global operation profile")
     go_profile_wind = Tk()
-    go_profile_wind.title("Armageddon Profile")
+    go_profile_wind.title("Berserk Profile")
 
     go_profile_wind.geometry("400x360")
     uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
@@ -356,11 +361,11 @@ def main_app():
     app.resizable(False, False)
     app.geometry("700x400")
     menubar = Menu(app)
-    armageddon = Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="Armageddon", menu=armageddon)
-    armageddon.add_command(label="Profile", command=go_profile)
-    armageddon.add_command(label="Weekly Challenges", command=weekly_challenges)
-    armageddon.add_command(label="Undone missions", command=undone_missions)
+    goOp = Menu(menubar, tearoff=0)
+    menubar.add_cascade(label="Berserk", menu=goOp)
+    goOp.add_command(label="Profile", command=go_profile)
+    goOp.add_command(label="Weekly Challenges", command=weekly_challenges)
+    goOp.add_command(label="Undone missions", command=undone_missions)
     menubar.add_command(label="Resources", command=resources)
     menubar.add_command(label="Crates", command=crates)
     menubar.add_command(label="About", command=about_window)
