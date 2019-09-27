@@ -353,6 +353,101 @@ def main_app():
                     append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
         app.after(30000,check_crates)
 
+    def check_mission(missionType):
+        which_mission = s.get("https://{}/minigames/bp6/research/list".format(base_url)).json()
+        if "time_left" not in str(which_mission['data']): # No hate for this pls
+            energy_req=s.get("https://{}/minigames/bp6/colony/upgrades".format(base_url)).json()
+            energy = energy_req['data']['energy']['energy']
+            for research in which_mission['data']:
+                if research['id'] == missionType:
+                    print(research['id'])
+                    if energy >= research['requirements']['energy']:
+                        get_mg_token()
+                        req = s.post("https://{}/minigames/bp6/research/start".format(base_url),data={"research_id":research['id']}).json()
+                        append_out_text(
+                            "[{actiontime}] Starting research ({mission})"
+                            .format(actiontime=str(time.strftime('%b %d %X')),
+                                    mission=research['type']))
+                        check_mission(missionType)
+                    else:
+                        append_out_text(
+                            "[{actiontime}] Not enough energy ({energy}) to start this mission"
+                            .format(actiontime=str(time.strftime('%b %d %X')),
+                                    energy=energy))
+                        app.after(1800000, check_mission, missionType)
+        else:
+            for research in which_mission['data']:
+                if 'time_left' in research:
+                    if research['time_left'] == 0:
+                        get_mg_token()
+                        req = s.post("https://{}/minigames/bp6/research/take-rewards".format(base_url),data={"research_id":research['id']}).json()
+                        rewards = {
+                            "currency" : "Resources",
+                            "experience" : "Experience",
+                            "chest_key" : "Crate key",
+                            "personal_box" : "Personal crate"
+                        }
+                        if not len(req['data']) == 0:
+                            for reward in req['data']:
+                                if "reward" in reward and (reward['reward']['type'] == "currency" or reward['reward']['type'] == "experience"):
+                                    append_out_text("[{actiontime}] Collecting research rewards: You got {amount} {what}".format(
+                                            actiontime=str(
+                                                time.strftime('%b %d %X')),
+                                            amount=reward['reward']['count'],
+                                            what=rewards[reward['reward']['type']]))
+                                elif "reward" in reward and (reward['reward']['type'] == "chest_key" or reward['reward']['type'] == "personal_box"):
+                                    append_out_text("[{actiontime}] Collecting research rewards: You got a {what}".format(
+                                            actiontime=str(
+                                                time.strftime('%b %d %X')),
+                                            what=rewards[reward['reward']['type']]))
+                                check_mission(missionType)
+                        else:
+                            append_out_text("[{actiontime}] Collecting research rewards: No rewards".format(
+                                    actiontime=str(time.strftime('%b %d %X'))))
+                            check_mission(missionType)
+                    elif research['time_left'] != 0:
+                        uprofile = s.get(
+                            "https://{}/minigames/bp5/user/info".format(
+                                base_url)).json()
+                        append_out_text(
+                            "[{actiontime}] Mission ending in {seconds}"
+                            .format(
+                                actiontime=str(time.strftime('%b %d %X')),
+                                seconds=datetime.timedelta(
+                                    seconds=uprofile['data']['base_mission'])))
+                        app.after(uprofile['data']['base_mission'] * 1000, check_mission, missionType)
+                        #Label(base_mission,text="Base missions ends in: {}".format(datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=0,sticky=W)
+    global task_history
+    task_history = {}
+    def check_tasks():
+        temp = {}
+        get_mg_token()
+        for i in range(1,12):
+            req = s.get("https://{url}/minigames/bp5/tasks/week-tasks?week={week}".format(url=base_url,week=i)).json()
+            if len(req['data']) == 0:
+                break
+            temp[i] = {}
+            for j, task in enumerate(req['data']):
+                temp[i][j] = (task['status'] == "progress")
+                global task_history
+                if task_history == {}:
+                    continue
+                if temp[i][j] != task_history[i][j]:
+                    append_out_text(
+                        "[{actiontime}] Task Completed : Week {week} / Task {task}. {description}"
+                        .format(
+                            actiontime=str(time.strftime('%b %d %X')),
+                            week=i,
+                            task=j+1,
+                            description=task['descr'] if not LoginType.get() == "mailru" else translator.translate(task['descr']).text))
+
+        task_history = temp
+        #append_out_text(
+        #    "[{actiontime}] Task List updated"
+        #    .format(actiontime=str(time.strftime('%b %d %X'))))
+        app.after(60000, check_tasks)
+
+
     print("Opening Main app")
     login_window.destroy()
     user_check_json = s.get('https://{}/minigames/bp/user-info'.format(base_url)).json()
@@ -370,6 +465,7 @@ def main_app():
     menubar.add_command(label="Crates", command=crates)
     menubar.add_command(label="About", command=about_window)
     menubar.add_command(label="Update", command=check_for_updates)
+    menubar.add_command(label="Config", command=config_window)
     # display the menu
     app.config(menu=menubar)
 
@@ -378,7 +474,85 @@ def main_app():
     user_check_json = s.get('https://{}/minigames/bp/user-info'.format(base_url)).json()
     out_text.insert(END,"Logged in as {}".format(user_check_json['data']['username']))
     app.after(30000,check_crates)
+
+    try:
+        if CREDS[CREDS['LoginType']]['missiontype'] == "0":
+            append_out_text(
+            "[{actiontime}] Automatic mission starting is disabled".format(
+                actiontime=str(time.strftime('%b %d %X'))))
+        else:
+            mType = "short" if CREDS[CREDS['LoginType']]['missiontype'] == "1" else "long"
+            which_mission = s.get(
+                "https://{}/minigames/bp6/research/list".format(
+                    base_url)).json()
+            for research in which_mission['data']:
+                if research['type'] == mType:
+                    append_out_text(
+                        "[{actiontime}] Automatically starting {mType} missions"
+                        .format(actiontime=str(time.strftime('%b %d %X')),
+                                mType=mType))
+                    app.after(5000,check_mission,research['id'])
+    except KeyError:
+        append_out_text(
+            "[{actiontime}] Automatic mission starting is disabled".format(
+                actiontime=str(time.strftime('%b %d %X'))))
+    task_history = {}
+    app.after(20000, check_tasks)
     app.mainloop()
+
+def config_window():
+    print("Opening Config window")
+
+    config_app = Tk()
+    config_app.title("Config")
+    config_app.resizable(False, False)
+    config_app.geometry("250x100")
+    uprofile = s.get(
+        "https://{}/minigames/bp5/user/info".format(base_url)).json()
+    base_level = uprofile['data']['base_level']
+    Label(config_app, text="\nMission to start automatically").grid(row=0, column=0, sticky=W)
+    MissionType = StringVar(master=config_app)
+
+    def save_config():
+        config_app.destroy()
+        CREDS[CREDS['LoginType']]['missiontype'] = MissionType.get()
+        with open('creds.json','w') as json_file:
+            json.dump(CREDS, json_file, indent=4, sort_keys=True)
+        messagebox.showinfo(
+            "Config Saved",
+            "You need to restart the app in order to enable the new config"
+        )
+
+    try:
+        MissionType.set(CREDS[CREDS['LoginType']]['missiontype'])
+    except KeyError:
+        MissionType.set("0")
+
+    mission_selector = Frame(config_app)
+    mission_selector.grid(row=1, columnspan=3,sticky = W)
+    Radiobutton(mission_selector,
+                text="None",
+                variable=MissionType,
+                value="0").grid(row=1, column=0, sticky=W)
+
+    if base_level>=1:
+        Radiobutton(mission_selector,
+                    text="Short",
+                    variable=MissionType,
+                    value="1").grid(row=1, column=1, sticky=W)
+
+    if base_level>=2:
+        Radiobutton(mission_selector,
+                    text="Long",
+                    variable=MissionType,
+                    value="2").grid(row=1, column=2, sticky=W)
+
+    submit = Button(config_app,
+                    bd=2,
+                    text='Save',
+                    command=save_config).grid(row=3, column=1)
+
+
 
 def about_window():
     print("Opening About window")
