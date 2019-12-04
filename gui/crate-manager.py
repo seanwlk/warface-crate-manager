@@ -4,7 +4,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.9"
+__version__ = "1.92"
 
 import sys, os
 import datetime,time
@@ -626,7 +626,7 @@ def steam_login():
 
     while True:
         try:
-            entrance=s.get('https://auth-ac.my.com/social/steam?continue=https://account.my.com/social_back/?continue=https://wf.my.com/en/&failure=https://account.my.com/social_back/?soc_error=1&continue=https://wf.my.com/en/')
+            entrance=s.get('https://auth-ac.my.games/social/steam?display=popup&continue=https%3A%2F%2Faccount.my.games%2Fsocial_back%2F%3Fcontinue%3Dhttps%253A%252F%252Faccount.my.games%252Foauth2%252F%253Fredirect_uri%253Dhttps%25253A%25252F%25252Fpc.warface.com%25252Fdynamic%25252Fauth%25252F%25253Fo2%25253D1%2526client_id%253Dwf.my.com%2526response_type%253Dcode%2526signup_method%253Demail%252Cphone%2526signup_social%253Dmailru%25252Cfb%25252Cvk%25252Cg%25252Cok%25252Ctwitch%25252Ctw%25252Cps%25252Cxbox%25252Csteam%2526lang%253Den_US%26client_id%3Dwf.my.com%26popup%3D1&failure=https%3A%2F%2Faccount.my.games%2Fsocial_back%2F%3Fsoc_error%3D1%26continue%3Dhttps%253A%252F%252Faccount.my.games%252Foauth2%252Flogin%252F%253Fcontinue%253Dhttps%25253A%25252F%25252Faccount.my.games%25252Foauth2%25252Flogin%25252F%25253Fcontinue%25253Dhttps%2525253A%2525252F%2525252Faccount.my.games%2525252Foauth2%2525252F%2525253Fredirect_uri%2525253Dhttps%252525253A%252525252F%252525252Fpc.warface.com%252525252Fdynamic%252525252Fauth%252525252F%252525253Fo2%252525253D1%25252526client_id%2525253Dwf.my.com%25252526response_type%2525253Dcode%25252526signup_method%2525253Demail%2525252Cphone%25252526signup_social%2525253Dmailru%252525252Cfb%252525252Cvk%252525252Cg%252525252Cok%252525252Ctwitch%252525252Ctw%252525252Cps%252525252Cxbox%252525252Csteam%25252526lang%2525253Den_US%252526client_id%25253Dwf.my.com%252526lang%25253Den_US%252526signup_method%25253Demail%2525252Cphone%252526signup_social%25253Dmailru%2525252Cfb%2525252Cvk%2525252Cg%2525252Cok%2525252Ctwitch%2525252Ctw%2525252Cps%2525252Cxbox%2525252Csteam%2526amp%253Bclient_id%253Dwf.my.com%2526amp%253Blang%253Den_US%2526amp%253Bsignup_method%253Demail%25252Cphone%2526amp%253Bsignup_social%253Dmailru%25252Cfb%25252Cvk%25252Cg%25252Cok%25252Ctwitch%25252Ctw%25252Cps%25252Cxbox%25252Csteam')
             openid_login={}
             html = StringIO(entrance.content.decode())
             tree = lxml.html.parse(html)
@@ -637,8 +637,8 @@ def steam_login():
                         openid_login[field.get('name')]=field.get('value')
             s.headers.update({'referer': entrance.url})
             steam_redir=s.post('https://steamcommunity.com/openid/login', data=openid_login)
-            s.get('https://auth-ac.my.com/sdc?from=https%3A%2F%2Fwf.my.com')
-            get_token = s.get('https://wf.my.com/minigames/user/info').json()
+            s.get('https://auth-ac.my.games/sdc?from=https%3A%2F%2Faccount.my.games%2Foauth2%2F%3Fredirect_uri%3Dhttps%253A%252F%252Fpc.warface.com%252Fdynamic%252Fauth%252F%253Fo2%253D1%26client_id%3Dwf.my.com%26response_type%3Dcode%26signup_method%3Demail%2Cphone%26signup_social%3Dmailru%252Cfb%252Cvk%252Cg%252Cok%252Ctwitch%252Ctw%252Cps%252Cxbox%252Csteam%26lang%3Den_US%26signup%3D1')
+            get_token = s.get('https://pc.warface.com/minigames/user/info').json()
             s.cookies['mg_token'] = get_token['data']['token']
             s.cookies['cur_language'] = op_lang()
         except:
@@ -646,32 +646,41 @@ def steam_login():
         break
     main_app()
 
-def mycom_login():
+def mygames_login():
     payload = {
-        'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Encoding':'gzip, deflate, br',
-        'Accept-Language':'en-US,en;q=0.9,it;q=0.8',
-        'Connection':'keep-alive',
-        'Content-Type':'application/x-www-form-urlencoded',
-        'Cookie':'s=dpr=1; amc_lang=en_US; t_0=1; _ym_isad=1',
-        'DNT':'1',
-        'Origin':'https://wf.my.com',
-        'Referer':'https://wf.my.com/battlepass',
-        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
-        }
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Accept-Language': 'en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7',
+      'Connection': 'keep-alive',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Cookie':'amc_lang=en_US; ',
+      'DNT': '1',
+      'Host': 'auth-ac.my.games',
+      'Origin': 'https://account.my.games',
+      'Referer': 'https://account.my.games/oauth2/login/?continue=https%3A%2F%2Faccount.my.games%2Foauth2%2F%3Fredirect_uri%3Dhttps%253A%252F%252Fpc.warface.com%252Fdynamic%252Fauth%252F%253Fo2%253D1%26client_id%3Dwf.my.com%26response_type%3Dcode%26signup_method%3Demail%2Cphone%26signup_social%3Dmailru%252Cfb%252Cvk%252Cg%252Cok%252Ctwitch%252Ctw%252Cps%252Cxbox%252Csteam%26lang%3Den_US&client_id=wf.my.com&lang=en_US&signup_method=email%2Cphone&signup_social=mailru%2Cfb%2Cvk%2Cg%2Cok%2Ctwitch%2Ctw%2Cps%2Cxbox%2Csteam',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+      }
     login_data = {
-        'email':email.get(),
-        'password':password.get(),
-        'continue':'https://account.my.com/login_continue/?continue=https%3A%2F%2Faccount.my.com%2Fprofile%2Fuserinfo%2F',
-        'failure':'https://account.my.com/login/?continue=https%3A%2F%2Faccount.my.com%2Fprofile%2Fuserinfo%2F',
-        'nosavelogin':'0'
-        }
+      'email':email.get(),
+      'password':password.get(),
+      'continue':'https://account.my.games/oauth2/?redirect_uri=https%3A%2F%2Fpc.warface.com%2Fdynamic%2Fauth%2F%3Fo2%3D1&client_id=wf.my.com&response_type=code&signup_method=email,phone&signup_social=mailru%2Cfb%2Cvk%2Cg%2Cok%2Ctwitch%2Ctw%2Cps%2Cxbox%2Csteam&lang=en_US',
+      'failure':'https://account.my.games/oauth2/login/?continue=https%3A%2F%2Faccount.my.games%2Foauth2%2Flogin%2F%3Fcontinue%3Dhttps%253A%252F%252Faccount.my.games%252Foauth2%252F%253Fredirect_uri%253Dhttps%25253A%25252F%25252Fpc.warface.com%25252Fdynamic%25252Fauth%25252F%25253Fo2%25253D1%2526client_id%253Dwf.my.com%2526response_type%253Dcode%2526signup_method%253Demail%252Cphone%2526signup_social%253Dmailru%25252Cfb%25252Cvk%25252Cg%25252Cok%25252Ctwitch%25252Ctw%25252Cps%25252Cxbox%25252Csteam%2526lang%253Den_US%26client_id%3Dwf.my.com%26lang%3Den_US%26signup_method%3Demail%252Cphone%26signup_social%3Dmailru%252Cfb%252Cvk%252Cg%252Cok%252Ctwitch%252Ctw%252Cps%252Cxbox%252Csteam&amp;client_id=wf.my.com&amp;lang=en_US&amp;signup_method=email%2Cphone&amp;signup_social=mailru%2Cfb%2Cvk%2Cg%2Cok%2Ctwitch%2Ctw%2Cps%2Cxbox%2Csteam',
+      'nosavelogin':'0'
+      }
     while True:
         try:
-            s.post('https://auth-ac.my.com/auth',headers=payload,data=login_data)
-            s.get('https://auth-ac.my.com/sdc?from=https%3A%2F%2Fwf.my.com')
-            s.get('https://wf.my.com/')
-            get_token = s.get('https://wf.my.com/minigames/user/info').json()
+            r = s.post('https://auth-ac.my.games/auth',headers=payload,data=login_data, allow_redirects=False)
+            for i in range(0,5):
+              """
+              1- Auth redirect to oauth2
+              2- Oauth2 redirect to sdc
+              3- Generates link to get to sdc token
+              4- SDC token redirects to oauth2
+              5- Auth link for pc.warface.com is generated
+              6- GET auth link for session
+              """
+              r = s.get(r.headers['location'], allow_redirects=False)
+            get_token = s.get('https://pc.warface.com/minigames/user/info').json()
             s.cookies['mg_token'] = get_token['data']['token']
             s.cookies['cur_language'] = op_lang()
         except:
@@ -722,13 +731,13 @@ def login(event=None):
     CREDS[LoginType.get()]['password'] = password.get()
     with open('creds.json','w') as json_file:
         json.dump(CREDS, json_file, indent=4, sort_keys=True)
-    if LoginType.get() == "mycom":
-        print ("Login as My.com")
-        base_url = "wf.my.com"
-        mycom_login()
+    if LoginType.get() == "mygames":
+        print ("Login as My.games")
+        base_url = "pc.warface.com"
+        mygames_login()
     elif LoginType.get() == "steam":
         print ("Login as Steam")
-        base_url = "wf.my.com"
+        base_url = "pc.warface.com"
         steam_login()
     elif LoginType.get() == "mailru":
         print ("Login as Mail.ru")
@@ -752,7 +761,7 @@ login_window.title("Login")
 
 email = StringVar() #Email variable
 password = StringVar() #Password variable
-LoginType = StringVar() # select login service, at the time only steam, mycom and mailru
+LoginType = StringVar() # select login service, at the time only steam, mygames and mailru
 
 if os.path.isfile('./creds.json'):
     with open('creds.json','r') as json_file:
@@ -760,7 +769,7 @@ if os.path.isfile('./creds.json'):
     try:
         LoginType.set(CREDS['LoginType'])
     except KeyError:
-        LoginType.set("mycom")
+        LoginType.set("mygames")
     try:
         email.set(CREDS[CREDS['LoginType']]['email'])
     except KeyError:
@@ -771,12 +780,12 @@ if os.path.isfile('./creds.json'):
         password.set("")
 else:
     CREDS = {}
-    LoginType.set("mycom")
+    LoginType.set("mygames")
 
 login_selector = Frame(login_window)
 login_selector.grid(row=0, columnspan=3,sticky = W)
-# Mycom true/false
-Radiobutton(login_selector, text="My.com", variable=LoginType, value="mycom", command=loginSelected).grid(row=0,column=0,sticky = W)
+# Mygames true/false
+Radiobutton(login_selector, text="My.games", variable=LoginType, value="mygames", command=loginSelected).grid(row=0,column=0,sticky = W)
 # Steam true/false
 Radiobutton(login_selector, text="Steam", variable=LoginType, value="steam", command=loginSelected).grid(row=0,column=1,sticky = W)
 # Mail.ru true/false
