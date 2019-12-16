@@ -4,6 +4,7 @@ __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
 __version__ = "3.1"
+__status__ = "DEPRECATED"
 
 import sys, os
 import time
