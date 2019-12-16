@@ -24,10 +24,30 @@ s = requests.Session()
 __currentOperation = "Berserk"
 
 def check_for_updates(silent=False):
+  def update():
+    def downloadUpdate(name,url):
+      req = requests.get(url)
+      open (name,'wb').write(req.content)
+      messagebox.showinfo("Download completed","The download of {} was completed. It is now in the same path as this executable. \nYou can now proceed un-zipping the file and replacing the old ones. Make sure to save creds.json".format(name))
+    update_window = Tk()
+    update_window.title("Update")
+    update_window.resizable(False, False)
+    update_window.geometry("350x280")
+    Label(update_window, text="Available versions",fg="Light sky blue", font=("Helvetica", 16)).pack()
+    Label(update_window,text="GUI: contains just the exe file and all the libraries packed inside\nUnpacked: libraries are separate from executable, making \n it faster and lighter on low end PCs").pack()
+    Label(update_window).pack()
+    for index,asset in enumerate(ver['assets']):
+      assetFrame = Frame(update_window)
+      assetFrame.pack()
+      Label(assetFrame,text=asset['name']).pack()
+      Button(assetFrame,bd=2,text="Download",command=partial(downloadUpdate,asset['name'],asset['browser_download_url'])).pack()
+    update_window.mainloop()
   ver = requests.get("https://api.github.com/repos/seanwlk/warface-crate-manager/releases/latest").json()
   print("Looking for udpates")
   if __version__ < ver['tag_name']:
-    messagebox.showwarning("New version available!","You are currently running version {current} but {latest} is available.\n\nChangelog:\n{changes}".format(current=__version__,latest=ver['tag_name'],changes=ver['body']))
+    user_response = messagebox.askquestion("New version available!","You are currently running version {current} but {latest} is available.\n\nChangelog:\n{changes}".format(current=__version__,latest=ver['tag_name'],changes=ver['body']),icon='warning')
+    if user_response == "yes":
+      update()
   else:
     if not silent:
       messagebox.showinfo("No updates available","You are currently running the latest version of the project.")
