@@ -471,7 +471,7 @@ def main_app():
               actiontime=str(time.strftime('%b %d %X')),
               week=i,
               task=j+1,
-              description=task['descr'] if not LoginType.get() == "mailru" else translator.translate(task['descr']).text))
+              description=task['descr'])
 
     task_history = temp
     #append_out_text(
