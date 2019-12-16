@@ -4,7 +4,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.92"
+__version__ = "1.91"
 
 import sys, os
 import datetime,time
@@ -24,12 +24,10 @@ s = requests.Session()
 __currentOperation = "Berserk"
 
 def check_for_updates(silent=False):
-    def latest_ver():
-        ver = requests.get("https://api.github.com/repos/seanwlk/warface-crate-manager/releases/latest").json()
-        return ver['tag_name']
+    ver = requests.get("https://api.github.com/repos/seanwlk/warface-crate-manager/releases/latest").json()
     print("Looking for udpates")
-    if __version__ < latest_ver():
-        messagebox.showwarning("New version available!","You are currently running a different version than the latest release available. Please update.")
+    if __version__ < ver['tag_name']:
+        messagebox.showwarning("New version available!","You are currently running version {current} but {latest} is available.\n\nChangelog:\n{changes}".format(current=__version__,latest=ver['tag_name'],changes=ver['body']))
     else:
         if not silent:
             messagebox.showinfo("No updates available","You are currently running the latest version of the project.")
