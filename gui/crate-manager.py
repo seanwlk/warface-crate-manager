@@ -21,6 +21,7 @@ from tkinter import ttk,simpledialog,messagebox
 from functools import partial
 
 s = requests.Session()
+__currentOperation = "Berserk"
 
 def check_for_updates(silent=False):
     def latest_ver():
@@ -161,7 +162,7 @@ def weekly_challenges():
             #print(req.text)
     print("Opening weekly challenges window")
     weekly_challenges_window = Tk()
-    weekly_challenges_window.title("Berserk missions to complete")
+    weekly_challenges_window.title("{} missions to complete".format(__currentOperation))
     weekly_challenges_window.resizable(False, True)
     weekly_challenges_window.geometry("800x550")
 
@@ -188,7 +189,7 @@ def weekly_challenges():
 def undone_missions():
     print("Opening undone missions window")
     todo_missions = Tk()
-    todo_missions.title("Berserk missions to complete")
+    todo_missions.title("{} missions to complete".format(__currentOperation))
     todo_missions.geometry("800x400")
     # main frame that contains multiple generated mission frames
     missionList = VerticalScrolledFrame(todo_missions)
@@ -279,7 +280,7 @@ def go_profile():
             go_profile()
     print("Opening global operation profile")
     go_profile_wind = Tk()
-    go_profile_wind.title("Berserk Profile")
+    go_profile_wind.title("{} Profile".format(__currentOperation))
 
     go_profile_wind.geometry("400x360")
     uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
@@ -470,7 +471,7 @@ def main_app():
     app.geometry("700x400")
     menubar = Menu(app)
     goOp = Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="Berserk", menu=goOp)
+    menubar.add_cascade(label=__currentOperation, menu=goOp)
     goOp.add_command(label="Profile", command=go_profile)
     goOp.add_command(label="Weekly Challenges", command=weekly_challenges)
     goOp.add_command(label="Undone missions", command=undone_missions)
