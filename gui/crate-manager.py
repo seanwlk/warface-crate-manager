@@ -18,6 +18,7 @@ from io import StringIO
 import lxml.html
 from tkinter import *
 from tkinter import ttk,simpledialog,messagebox
+from functools import partial
 
 s = requests.Session()
 
@@ -147,6 +148,17 @@ class VerticalScrolledFrame:
             self.canvas.yview_scroll(1, "units" )
 
 def weekly_challenges():
+    def skipTask(task,cost,m):
+        print ("Skipping task: {}".format(task))
+        try:
+            user_response = messagebox.askquestion('Skipping Mission','Are you sure you want to skip this mission?\nCost:{cost} BP\n\n{m}'.format(cost=cost,m=m),icon = 'warning')
+            if user_response == "yes":
+                req = s.post("https://{url}/minigames/bp5/tasks/skip".format(url=base_url),data={"event_ids":int(task)}).json()
+                messagebox.showinfo("Skipping mission", "{} skipping.".format(req['state']))
+            weekly_challenges_window.lift()
+        except:
+            messagebox.showerror("Skipping mission", "Failed skipping.")
+            #print(req.text)
     print("Opening weekly challenges window")
     weekly_challenges_window = Tk()
     weekly_challenges_window.title("Berserk missions to complete")
@@ -169,8 +181,9 @@ def weekly_challenges():
             Label(taskFrame,text="Progress: {progress}/{target} | EXP: {exp} | Skip cost: {skip} | To do in one game: {one_game}".format(progress=task['progress'],target=task['target_count'],exp=task['exp'], skip=task['skip_cost'], one_game = "YES" if task['is_one_game'] == 1 else "NO")).grid(row=1,sticky = W)
             if task['status'] == "completed":
                 Label(taskFrame,text="\u2713",fg="green",font=("Arial", 18)).grid(row=0,rowspan=2, column=1,sticky = E)
+            else:
+                Button(taskFrame,bd=2,text='Skip',command=partial(skipTask,task['event_id'],task['skip_cost'],task['descr'])).grid(row=0,rowspan=2, column=1,sticky=E)
         tabDisplayer.add(weekFrame,text="Week {}".format(i))
-
 
 def undone_missions():
     print("Opening undone missions window")
