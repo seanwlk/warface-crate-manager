@@ -465,18 +465,8 @@ def main_app():
         if task_history == {}:
           continue
         if temp[i][j] != task_history[i][j]:
-          append_out_text(
-            "[{actiontime}] Task Completed : Week {week} / Task {task}. {description}"
-            .format(
-              actiontime=str(time.strftime('%b %d %X')),
-              week=i,
-              task=j+1,
-              description=task['descr'])
-
+          append_out_text("[{actiontime}] Task Completed : Week {week} / Task {task}. {description}".format(actiontime=str(time.strftime('%b %d %X'))),week=i,task=j+1,description=task['descr'])
     task_history = temp
-    #append_out_text(
-    #  "[{actiontime}] Task List updated"
-    #  .format(actiontime=str(time.strftime('%b %d %X'))))
     app.after(60000, check_tasks)
 
 
