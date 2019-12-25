@@ -242,9 +242,9 @@ def go_profile():
     personal_crates.geometry("400x200")
     cratescroll = VerticalScrolledFrame(personal_crates)
     cratescroll.pack(fill="x", expand=True)
-    uprofile = s.get("https://{}/minigames/bp5/user/info".format(base_url)).json()
+    wallets = s.get("https://{}/minigames/battlepass/wallets".format(base_url)).json()
     get_mg_token()
-    response = s.post("https://{}/minigames/personal_box/api/open".format(base_url), data={'count' : uprofile['data']['personal_boxes']}).json()
+    response = s.post("https://{}/minigames/personal_box/api/open".format(base_url), data={'count' : wallets['data']['personal_boxes']}).json()
     for item in response['data']['rewards']:
       itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
       itemFrame.pack(fill="x", expand=True)
