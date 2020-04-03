@@ -4,7 +4,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.93"
+__version__ = "1.94"
 
 import sys, os
 import datetime,time
@@ -21,7 +21,7 @@ from tkinter import ttk,simpledialog,messagebox
 from functools import partial
 
 s = requests.Session()
-__currentOperation = "Blackwood"
+__currentOperation = "Gorgona"
 
 def check_for_updates(silent=False):
   def update():
@@ -305,7 +305,7 @@ def go_profile():
   go_profile_wind.title("{} Profile".format(__currentOperation))
 
   go_profile_wind.geometry("400x360")
-  uprofile = s.get("https://{}/minigames/bp/user-info".format(base_url)).json()
+  uprofile = s.get("https://{}/minigames/user/info".format(base_url)).json()
   wallets = s.get("https://{}/minigames/battlepass/wallets".format(base_url)).json()
   daily_task = s.get("https://{}/minigames/battlepass/daily/user-task".format(base_url)).json()
   Label(go_profile_wind, text="Level: {}".format(uprofile['data']['level'])).grid(row=0,sticky = W)
@@ -475,7 +475,7 @@ def main_app():
 
   print("Opening Main app")
   login_window.destroy()
-  user_check_json = s.get('https://{}/minigames/bp/user-info'.format(base_url)).json()
+  user_check_json = s.get('https://{}/minigames/user/info'.format(base_url)).json()
   app = Tk()
   app.title("Warface Crate Manager - {}".format(user_check_json['data']['username']))
   app.resizable(False, False)
@@ -496,7 +496,7 @@ def main_app():
 
   out_text = Text(app,  width=85)
   out_text.pack()
-  user_check_json = s.get('https://{}/minigames/bp/user-info'.format(base_url)).json()
+  user_check_json = s.get('https://{}/minigames/user/info'.format(base_url)).json()
   out_text.insert(END,"Logged in as {}".format(user_check_json['data']['username']))
   app.after(30000,check_crates)
 
