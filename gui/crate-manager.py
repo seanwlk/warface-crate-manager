@@ -4,7 +4,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.94"
+__version__ = "1.95"
 
 import sys, os
 import datetime,time
@@ -166,197 +166,90 @@ class VerticalScrolledFrame:
     elif event.num == 5 or event.delta < 0:
       self.canvas.yview_scroll(1, "units" )
 
-def weekly_challenges():
-  def skipTask(task,cost,m):
-    print ("Skipping task: {}".format(task))
-    try:
-      user_response = messagebox.askquestion('Skipping Mission','Are you sure you want to skip this mission?\nCost:{cost} BP\n\n{m}'.format(cost=cost,m=m),icon = 'warning')
-      if user_response == "yes":
-        req = s.post("https://{url}/minigames/battlepass/tasks/skip".format(url=base_url),data={"event_ids":int(task)}).json()
-        messagebox.showinfo("Skipping mission", "{} skipping.".format(req['state']))
-      weekly_challenges_window.lift()
-    except:
-      messagebox.showerror("Skipping mission", "Failed skipping.")
-      #print(req.text)
-  print("Opening weekly challenges window")
-  weekly_challenges_window = Tk()
-  weekly_challenges_window.title("{} missions to complete".format(__currentOperation))
-  weekly_challenges_window.resizable(False, True)
-  weekly_challenges_window.geometry("800x550")
-
-  tabDisplayer = ttk.Notebook(weekly_challenges_window)
-  tabDisplayer.pack(fill="x", expand=True)
-  for i in range(1,20):
-    req = s.get("https://{url}/minigames/battlepass/tasks/week-tasks?week={week}".format(url=base_url,week=i)).json()
-    if len(req['data']) == 0:
-      break
-    weekFrame = Frame(tabDisplayer)
-    weekFrame.pack(fill="x", expand=True)
-    Label(weekFrame,text="Available from {}".format(time.ctime(req['data'][0]['started_at']))).pack()
-    for task in req['data']:
-      taskFrame = Frame(weekFrame,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
-      taskFrame.pack(fill="x", expand=True)
-      Label(taskFrame,text="{}".format(task['descr'])).grid(row=0,sticky = W)
-      Label(taskFrame,text="Progress: {progress}/{target} | EXP: {exp} | Skip cost: {skip} | To do in one game: {one_game}".format(progress=task['progress'],target=task['target_count'],exp=task['exp'], skip=task['skip_cost'], one_game = "YES" if task['is_one_game'] == 1 else "NO")).grid(row=1,sticky = W)
-      if task['is_complete']:
-        Label(taskFrame,text="\u2713",fg="green",font=("Arial", 18)).grid(row=0,rowspan=2, column=1,sticky = E)
+def daily_tasks():
+  def showRewards(rewards):
+    data = []
+    for r in rewards:
+      if r['reward']['type'] == "game_item":
+        if 'permanent' in r['reward']['item'].values() or 'permanent' in r['reward']['item']:
+          data.append(r['title']+ " - Permanent")
+        elif 'consumable' in r['reward']['item'].values() or 'consumable' in r['reward']['item']:
+          data.append(r['title']+ " - Amount: {}".format(r['reward']['item']['count']))
+        else:
+          data.append(r['title']+ " - {0} {1}".format(r['reward']['item']['duration'],r['reward']['item']['duration_type']))
+      elif r['reward']['type'] == "currency":
+        if r['reward']['currency'] == "soft":
+          data.append(str(r['reward']['count']) + ' Currency')
+        elif r['reward']['currency'] == "hard":
+          data.append(str(r['reward']['count']) + ' Rare Tokens')
       else:
-        Button(taskFrame,bd=2,text='Skip',command=partial(skipTask,task['event_id'],task['skip_cost'],task['descr'])).grid(row=0,rowspan=2, column=1,sticky=E)
-    tabDisplayer.add(weekFrame,text="Week {}".format(i))
-
-def undone_missions():
-  print("Opening undone missions window")
+        data.append(r['title']) # Will this even happen ?
+    return "\n".join(data)
+  print("Opening daily tasks window")
   todo_missions = Tk()
   todo_missions.title("{} missions to complete".format(__currentOperation))
-  todo_missions.geometry("800x400")
+  todo_missions.geometry("790x575")
   # main frame that contains multiple generated mission frames
   missionList = VerticalScrolledFrame(todo_missions)
   missionList.pack(fill="x", expand=True)
-  for i in range(1,20):
-    req = s.get("https://{url}/minigames/battlepass/tasks/week-tasks?week={week}".format(url=base_url,week=i)).json()
-    if len(req['data']) == 0:
-      break
-    for task in req['data']:
-      if not task['is_complete']:
-        missionFrame = Frame(missionList,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
-        missionFrame.pack(fill="x", expand=True)
-        Label(missionFrame,text="Week {}".format(i)).grid(row=0,sticky = W)
-        Label(missionFrame,text="{}".format(task['descr'])).grid(row=1,sticky = W)
-        Label(missionFrame,text="Progress: {progress}/{target} | EXP: {exp} | Skip cost: {skip} | To do in one game: {one_game}".format(exp=task['exp'], skip=task['skip_cost'], progress=task['progress'],target=task['target_count'], one_game = "YES" if task['is_one_game'] == 1 else "NO")).grid(row=2,sticky = W)
-
-  missionList.pack(side = LEFT, fill = BOTH)
+  tasks = s.get("https://{url}/minigames/battlepass/task/all".format(url=base_url)).json()
+  tableFrame = Frame(missionList)
+  tableFrame.pack(fill="x", expand=True)
+  Label(tableFrame,text="Task").grid(row=0,column=0,sticky = W)
+  Label(tableFrame,text="Rewards").grid(row=0,column=1,sticky = W)
+  Label(tableFrame,text="Status").grid(row=0,column=2,sticky = W)
+  hr=Frame(tableFrame,height=1,width=750,bg="black")
+  hr.grid(row=0,columnspan=3,sticky = S)
+  for index, task in enumerate(tasks['data']):
+    index+=1
+    taskFrame = Frame(tableFrame,borderwidth=0,relief=GROOVE,highlightthickness=0,highlightcolor="light grey")
+    taskFrame.grid(row=index,column=0,sticky = W)
+    Label(taskFrame,text="{}".format(task['title'])).grid(row=0,sticky = W)
+    Label(taskFrame,text="Progress: {progress}/{target_count}".format(**task)).grid(row=1,sticky = W)
+    hr=Frame(tableFrame,height=1,width=730,bg="black")
+    hr.grid(row=index,columnspan=3,sticky = S)
+    
+    rewardFrame = Frame(tableFrame,borderwidth=0,relief=GROOVE,highlightthickness=0,highlightcolor="light grey")
+    rewardFrame.grid(row=index,column=1,sticky = W)
+    Label(rewardFrame,text="{}".format(showRewards(task['rewards'])),justify=LEFT).grid(row=0,rowspan=2,column=1,sticky = W)
+    
+    statusFrame = Frame(tableFrame,borderwidth=0,relief=GROOVE,highlightthickness=0,highlightcolor="light grey")
+    statusFrame.grid(row=index,column=2,sticky = W)
+    if task['is_complete']:
+      Label(statusFrame,text="\u2713",fg="green",font=("Arial", 18)).grid(row=0,rowspan=2,column=0,sticky = E)
+  missionList.pack(side=LEFT,fill=BOTH)
 
 def go_profile():
-  def level_progress(exp,prev,next):
-    exp = int(exp)
-    prev = int(prev)
-    next = int(next)
-    next -= prev
-    exp -= prev
-    # next : 200 = exp : x
-    return int((200*exp) / next)
-  def open_crates():
-    personal_crates =  Tk()
-    personal_crates.title("Opening Personal Crates")
-    personal_crates.resizable(False, True)
-    personal_crates.geometry("400x200")
-    cratescroll = VerticalScrolledFrame(personal_crates)
-    cratescroll.pack(fill="x", expand=True)
-    wallets = s.get("https://{}/minigames/battlepass/wallets".format(base_url)).json()
-    get_mg_token()
-    response = s.post("https://{}/minigames/personal_box/api/open".format(base_url), data={'count' : wallets['data']['personal_boxes']}).json()
-    for item in response['data']['rewards']:
-      itemFrame = Frame(cratescroll,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
-      itemFrame.pack(fill="x", expand=True)
-      Label(itemFrame,text="{}".format(item['title'])).grid(row=0,sticky = W)
-      try:
-        Label(itemFrame,text="{}".format("Permanent" if 'permanent' in item['item'] else ("Amount: {}".format(item['item']['count']) if 'consumable' in item['item'] else "{0} {1}".format(item['item']['duration'],item['item']['duration_type']) ))).grid(row=1,sticky = W) # Assuming that duration_type can be permanet. Untested.
-      except:
-        print(str(item)) # Mainly for debug since it was failing with Armageddon under  certain conditions
-        pass
-
-  def start_mission(missionType,which_mission,energy):
-    get_mg_token()
-    for research in which_mission['data']['researches']:
-      if research['type'] == missionType:
-        if energy >= research['requirements']['energy']:
-          req = s.post("https://{}/minigames/battlepass/research/start".format(base_url),data={"research_id":research['id']}).json()
-          messagebox.showinfo("Starting {} research".format(missionType), "{} starting.".format(req['state']))
-        else:
-          messagebox.showinfo("Starting {} research".format(missionType), "Not enough energy to start this mission. \nYour energy: {energy}\nRequired: {required}".format(energy=energy,required=research['requirements']['energy']))
-    go_profile_wind.destroy()
-    go_profile()
-
-  def upgrade_base():
-    # I believe its deprecated but im not sure since i dont understand how this battlepass works
-    to_upgrade = s.get("https://{}/minigames/bp6/colony/upgrades".format(base_url)).json()
-    user_response = messagebox.askquestion('Base upgrade','Are you sure you want to upgrade base?\nRequirements\n{bp} BP\n{res} Resources'.format(bp=to_upgrade['data']['next_level']['battle_points'],res=to_upgrade['data']['next_level']['resources']),icon = 'warning')
-    if user_response == "yes":
-      get_mg_token()
-      req = s.post("https://{}/minigames/bp6/colony/unlock-level".format(base_url)).json()
-      print(str(req))
-      messagebox.showinfo("Base upgrade", "{} upgrading.".format(req['state']))
-    go_profile_wind.destroy()
-    go_profile()
-
-  def get_research_reward(missionType):
-    get_mg_token()
-    req = s.post("https://{}/minigames/battlepass/research/take-rewards".format(base_url),data={"research_id":missionType}).json()
-    rewards = {
-      "currency" : "Resources",
-      "experience" : "Experience",
-      "chest_key" : "Crate key",
-      "personal_box" : "Personal crate"
-    }
-    if not len(req['data']) == 0:
-      for reward in req['data']:
-        if "reward" in reward and (reward['reward']['type'] == "currency" or reward['reward']['type'] == "experience"):
-          messagebox.showinfo("Collecting research rewards", "You got {amount} {what}".format(amount=reward['reward']['count'],what=rewards[reward['reward']['type']]))
-        elif "reward" in reward and (reward['reward']['type'] == "chest_key" or reward['reward']['type'] == "personal_box"):
-          messagebox.showinfo("Collecting research rewards", "You got a {what}".format(what=rewards[reward['reward']['type']]))
-      go_profile_wind.destroy()
-      go_profile()
+  def openFreeCrate():
+    req = s.post("https://{}/minigames/battlepass/box/open".format(base_url),data={"chest_id":5,"count":1,"currency":3}).json()
+    print (req) # DEBUG
+    if len(req['data']) == 0:
+      content = "There were no rewards in this crate" # Is this possible?
     else:
-      messagebox.showinfo("Collecting research rewards", "Mission Failed.")
-      go_profile_wind.destroy()
-      go_profile()
+      item = req['data'][0]
+      if 'permanent' in item['reward']['item'].values() or 'permanent' in item['reward']['item']:
+        content = item['title']+ " - Permanent"
+      elif 'consumable' in item['reward']['item'].values() or 'consumable' in item['reward']['item']:
+        content = item['title']+ " - Amount: {}".format(item['count'])
+      else:
+        content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
+    messagebox.showinfo("Free crate opened", "Content: \n{content}".format(content))
+
   print("Opening global operation profile")
   go_profile_wind = Tk()
   go_profile_wind.title("{} Profile".format(__currentOperation))
-
   go_profile_wind.geometry("400x360")
-  uprofile = s.get("https://{}/minigames/user/info".format(base_url)).json()
+  uprofile = s.get("https://{}/minigames/battlepass/user/info".format(base_url)).json()
   wallets = s.get("https://{}/minigames/battlepass/wallets".format(base_url)).json()
-  daily_task = s.get("https://{}/minigames/battlepass/daily/user-task".format(base_url)).json()
-  Label(go_profile_wind, text="Level: {}".format(uprofile['data']['level'])).grid(row=0,sticky = W)
-  progressFrame = Frame(go_profile_wind)
-  progressFrame.grid(row=1,sticky = W)
-  levelup = ttk.Progressbar(progressFrame,orient=HORIZONTAL,length=200,mode='determinate')
-  levelup.grid(row=0,column=0,sticky = W)
-  levelup['value'] = level_progress(uprofile['data']['exp'],uprofile['data']['prev_exp'],uprofile['data']['next_exp'])
-  Label(progressFrame, text="{exp} / {next}".format(exp=uprofile['data']['exp'],next=uprofile['data']['next_exp'])).grid(row=0,column=1,sticky = W)
-
-  Label(go_profile_wind, text="Battlepoints: {}".format(wallets['data']['bp'])).grid(row=2,sticky = W)
-  #Label(go_profile_wind, text="Total missions completed: {}".format(uprofile['data']['progress'])).grid(row=3,sticky = W)
-
-  perboxes = Frame(go_profile_wind)
-  perboxes.grid(row=4,sticky = W)
-  Label(perboxes, text="Personal crates: {}".format(wallets['data']['personal_boxes'])).grid(row=0,sticky = W)
-  if wallets['data']['personal_boxes'] > 0:
-    Button(perboxes, bd =2,text='Open all crates',command=open_crates).grid(row=1,sticky=W)
-
-  Label(go_profile_wind, text="Resources: {}".format(wallets['data']['armory_resources'])).grid(row=5,sticky = W)
-  baseFrame = Frame(go_profile_wind)
-  baseFrame.grid(row=6,sticky = W)
-  #Label(baseFrame, text="Skill level: {}".format(wallets['data']['skill_points'])).grid(row=0,sticky = W)
-  #Button(baseFrame, bd=1,text='Upgrade base',command=upgrade_base).grid(row=1,sticky=W)
-
-  base_mission = Frame(go_profile_wind)
-  base_mission.grid(row=7,sticky = W)
-  which_mission = s.get("https://{}/minigames/battlepass/research/list".format(base_url)).json()
-  if "time_left" not in str(which_mission['data']):
-    Label(base_mission,text="No research in progress").grid(row=0,sticky=W)
-    Label(base_mission,text="Energy: {energy}".format(energy=which_mission['data']['energy'])).grid(row=1,sticky=W)
-    Button(base_mission, bd =2,text='Start short research',command=lambda: start_mission("short",which_mission,which_mission['data']['energy'])).grid(row=2,column=0,sticky=W)
-    Button(base_mission, bd =2,text='Start long research',command=lambda: start_mission("long",which_mission,which_mission['data']['energy'])).grid(row=2,column=1,sticky=W)
-  else:
-    for research in which_mission['data']:
-      if 'time_left' in research:
-        if research['time_left'] == 0:
-          Label(base_mission,text="Your research finished, collect reward.").grid(row=0,sticky=W)
-          missionType = research['id']
-          Button(base_mission, bd =2,text='Collect',command=lambda: get_research_reward(missionType)).grid(row=1,sticky=W)
-        elif research['time_left'] != 0:
-          Label(base_mission,text="Base missions ends in: {}".format(datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=0,sticky=W)
-
-  Label(go_profile_wind).grid(row=8,sticky = W) # Free line
-  Label(go_profile_wind, text="Daily mission").grid(row=9,sticky = W)
-  missionFrame = Frame(go_profile_wind,borderwidth=2,relief=GROOVE,highlightthickness=1,highlightcolor="light grey")
-  missionFrame.grid(row=10,sticky = W)
-  Label(missionFrame,text="{}".format(daily_task['data']['descr'])).grid(row=1,sticky = W)
-  Label(missionFrame,text="Progress: {progress}/{target} | To do in one game: {one_game}".format(progress=daily_task['data']['progress'],target=daily_task['data']['target_count'], one_game = "YES" if daily_task['data']['is_one_game'] == 1 else "NO")).grid(row=2,sticky = W)
-  if daily_task['data']['is_complete']:
-    Label(missionFrame,text="\u2713",fg="green",font=("Arial", 18)).grid(row=1,rowspan=2, column=1,sticky = E)
+  Label(go_profile_wind, text="Gorgona Access: {}".format("YES" if "gorgona" in uprofile['data']['accesses'] else "NO")).grid(row=0,sticky = W)
+  Label(go_profile_wind, text="Tokens: {}".format(wallets['data']['soft'])).grid(row=1,sticky = W)
+  Label(go_profile_wind, text="Rare Tokens: {}".format(wallets['data']['hard'])).grid(row=1,sticky = W)
+  Label(go_profile_wind, text="Victories: {}/5".format(wallets['data']['victory'])).grid(row=2,sticky = W)
+  freecrateFrame = Frame(go_profile_wind)
+  freecrateFrame.grid(row=4,sticky = W)
+  if wallets['data']['victory'] == 5:
+    Label(freecrateFrame, text="5 wins reached. You can claim your free crate.").grid(row=0,sticky = W)
+    Button(freecrateFrame, bd =2,text='Open',command=openFreeCrate).grid(row=1,sticky=W)
 
 def main_app():
   check_for_updates(silent=True)
@@ -389,89 +282,21 @@ def main_app():
           append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
     app.after(30000,check_crates)
 
-  def check_mission(missionType):
-    which_mission = s.get("https://{}/minigames/battlepass/research/list".format(base_url)).json()
-    if "time_left" not in str(which_mission['data']):
-      energy = which_mission['data']['energy']
-      for research in which_mission['data']:
-        if research['id'] == missionType:
-          print(research['id'])
-          if energy >= research['requirements']['energy']:
-            get_mg_token()
-            req = s.post("https://{}/minigames/battlepass/research/start".format(base_url),data={"research_id":research['id']}).json()
-            append_out_text(
-              "[{actiontime}] Starting research ({mission})"
-              .format(actiontime=str(time.strftime('%b %d %X')),
-                  mission=research['type']))
-            check_mission(missionType)
-          else:
-            append_out_text(
-              "[{actiontime}] Not enough energy ({energy}) to start this mission"
-              .format(actiontime=str(time.strftime('%b %d %X')),
-                  energy=energy))
-            app.after(1800000, check_mission, missionType)
-    else:
-      for research in which_mission['data']:
-        if 'time_left' in research:
-          if research['time_left'] == 0:
-            get_mg_token()
-            req = s.post("https://{}/minigames/battlepass/research/take-rewards".format(base_url),data={"research_id":research['id']}).json()
-            rewards = {
-              "currency" : "Resources",
-              "experience" : "Experience",
-              "chest_key" : "Crate key",
-              "personal_box" : "Personal crate"
-            }
-            if not len(req['data']) == 0:
-              for reward in req['data']:
-                if "reward" in reward and (reward['reward']['type'] == "currency" or reward['reward']['type'] == "experience"):
-                  append_out_text("[{actiontime}] Collecting research rewards: You got {amount} {what}".format(
-                      actiontime=str(
-                        time.strftime('%b %d %X')),
-                      amount=reward['reward']['count'],
-                      what=rewards[reward['reward']['type']]))
-                elif "reward" in reward and (reward['reward']['type'] == "chest_key" or reward['reward']['type'] == "personal_box"):
-                  append_out_text("[{actiontime}] Collecting research rewards: You got a {what}".format(
-                      actiontime=str(
-                        time.strftime('%b %d %X')),
-                      what=rewards[reward['reward']['type']]))
-                check_mission(missionType)
-            else:
-              append_out_text("[{actiontime}] Collecting research rewards: No rewards".format(
-                  actiontime=str(time.strftime('%b %d %X'))))
-              check_mission(missionType)
-          elif research['time_left'] != 0:
-            uprofile = s.get(
-              "https://{}/minigames/battlepass/user/info".format(
-                base_url)).json()
-            append_out_text(
-              "[{actiontime}] Mission ending in {seconds}"
-              .format(
-                actiontime=str(time.strftime('%b %d %X')),
-                seconds=datetime.timedelta(
-                  seconds=uprofile['data']['base_mission'])))
-            app.after(uprofile['data']['base_mission'] * 1000, check_mission, missionType)
-            #Label(base_mission,text="Base missions ends in: {}".format(datetime.timedelta(seconds=uprofile['data']['base_mission']))).grid(row=0,sticky=W)
   global task_history
   task_history = {}
   def check_tasks():
     temp = {}
     get_mg_token()
-    for i in range(1,12):
-      req = s.get("https://{url}/minigames/battlepass/tasks/week-tasks?week={week}".format(url=base_url,week=i)).json()
-      if len(req['data']) == 0:
-        break
-      temp[i] = {}
-      for j, task in enumerate(req['data']):
-        temp[i][j] = (task['is_complete'] == False)
-        global task_history
-        if task_history == {}:
-          continue
-        if temp[i][j] != task_history[i][j]:
-          append_out_text("[{actiontime}] Task Completed : Week {week} / Task {task}. {description}".format(actiontime=str(time.strftime('%b %d %X')),week=i,task=j+1,description=task['descr']))
+    req = s.get("https://{url}/minigames/battlepass/task/all".format(url=base_url)).json()
+    for j, task in enumerate(req['data']):
+      temp[j] = (task['is_complete'] == False)
+      global task_history
+      if task_history == {}:
+        continue
+      if temp[j] != task_history[j]:
+        append_out_text("[{actiontime}] Task Completed : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=task['title']))
     task_history = temp
     app.after(60000, check_tasks)
-
 
   print("Opening Main app")
   login_window.destroy()
@@ -484,13 +309,11 @@ def main_app():
   goOp = Menu(menubar, tearoff=0)
   menubar.add_cascade(label=__currentOperation, menu=goOp)
   goOp.add_command(label="Profile", command=go_profile)
-  goOp.add_command(label="Weekly Challenges", command=weekly_challenges)
-  goOp.add_command(label="Undone missions", command=undone_missions)
+  goOp.add_command(label="Daily Tasks", command=daily_tasks)
   menubar.add_command(label="Resources", command=resources)
   menubar.add_command(label="Crates", command=crates)
   menubar.add_command(label="About", command=about_window)
   menubar.add_command(label="Update", command=check_for_updates)
-  menubar.add_command(label="Config", command=config_window)
   # display the menu
   app.config(menu=menubar)
 
@@ -499,85 +322,9 @@ def main_app():
   user_check_json = s.get('https://{}/minigames/user/info'.format(base_url)).json()
   out_text.insert(END,"Logged in as {}".format(user_check_json['data']['username']))
   app.after(30000,check_crates)
-
-  try:
-    if CREDS[CREDS['LoginType']]['missiontype'] == "0":
-      append_out_text(
-      "[{actiontime}] Automatic mission starting is disabled".format(
-        actiontime=str(time.strftime('%b %d %X'))))
-    else:
-      mType = "short" if CREDS[CREDS['LoginType']]['missiontype'] == "1" else "long"
-      which_mission = s.get(
-        "https://{}/minigames/battlepass/research/list".format(
-          base_url)).json()
-      for research in which_mission['data']['researches']:
-        if research['type'] == mType:
-          append_out_text(
-            "[{actiontime}] Automatically starting {mType} missions"
-            .format(actiontime=str(time.strftime('%b %d %X')),
-                mType=mType))
-          app.after(5000,check_mission,research['id'])
-  except KeyError:
-    append_out_text(
-      "[{actiontime}] Automatic mission starting is disabled".format(
-        actiontime=str(time.strftime('%b %d %X'))))
   task_history = {}
   app.after(20000, check_tasks)
   app.mainloop()
-
-def config_window():
-  print("Opening Config window")
-
-  config_app = Tk()
-  config_app.title("Config")
-  config_app.resizable(False, False)
-  config_app.geometry("250x100")
-  uprofile = s.get(
-    "https://{}/minigames/battlepass/user/info".format(base_url)).json()
-  base_level = uprofile['data']['base_level']
-  Label(config_app, text="\nMission to start automatically").grid(row=0, column=0, sticky=W)
-  MissionType = StringVar(master=config_app)
-
-  def save_config():
-    config_app.destroy()
-    CREDS[CREDS['LoginType']]['missiontype'] = MissionType.get()
-    with open('creds.json','w') as json_file:
-      json.dump(CREDS, json_file, indent=4, sort_keys=True)
-    messagebox.showinfo(
-      "Config Saved",
-      "You need to restart the app in order to enable the new config"
-    )
-
-  try:
-    MissionType.set(CREDS[CREDS['LoginType']]['missiontype'])
-  except KeyError:
-    MissionType.set("0")
-
-  mission_selector = Frame(config_app)
-  mission_selector.grid(row=1, columnspan=3,sticky = W)
-  Radiobutton(mission_selector,
-        text="None",
-        variable=MissionType,
-        value="0").grid(row=1, column=0, sticky=W)
-
-  if base_level>=1:
-    Radiobutton(mission_selector,
-          text="Short",
-          variable=MissionType,
-          value="1").grid(row=1, column=1, sticky=W)
-
-  if base_level>=2:
-    Radiobutton(mission_selector,
-          text="Long",
-          variable=MissionType,
-          value="2").grid(row=1, column=2, sticky=W)
-
-  submit = Button(config_app,
-          bd=2,
-          text='Save',
-          command=save_config).grid(row=3, column=1)
-
-
 
 def about_window():
   print("Opening About window")
