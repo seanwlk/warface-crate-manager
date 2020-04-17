@@ -4,7 +4,7 @@
 __author__ = "seanwlk"
 __copyright__ = "Copyright 2019"
 __license__ = "GPL"
-__version__ = "1.95"
+__version__ = "1.96"
 
 import sys, os
 import datetime,time
@@ -233,7 +233,7 @@ def go_profile():
         content = item['title']+ " - Amount: {}".format(item['count'])
       else:
         content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
-    messagebox.showinfo("Free crate opened", "Content: \n{content}".format(content))
+    messagebox.showinfo("Free crate opened", "Content: \n{}".format(content))
 
   print("Opening global operation profile")
   go_profile_wind = Tk()
