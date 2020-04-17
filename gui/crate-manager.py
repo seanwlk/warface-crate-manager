@@ -221,7 +221,7 @@ def daily_tasks():
 
 def go_profile():
   def openFreeCrate():
-    req = s.post("https://{}/minigames/battlepass/box/open".format(base_url),data={"chest_id":5,"count":1,"currency":3}).json()
+    req = s.post("https://{}/minigames/battlepass/box/open".format(base_url),data={"id":5,"count":1,"currency":3}).json()
     print (req) # DEBUG
     if len(req['data']) == 0:
       content = "There were no rewards in this crate" # Is this possible?
