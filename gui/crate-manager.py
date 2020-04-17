@@ -243,8 +243,8 @@ def go_profile():
   wallets = s.get("https://{}/minigames/battlepass/wallets".format(base_url)).json()
   Label(go_profile_wind, text="Gorgona Access: {}".format("YES" if "gorgona" in uprofile['data']['accesses'] else "NO")).grid(row=0,sticky = W)
   Label(go_profile_wind, text="Tokens: {}".format(wallets['data']['soft'])).grid(row=1,sticky = W)
-  Label(go_profile_wind, text="Rare Tokens: {}".format(wallets['data']['hard'])).grid(row=1,sticky = W)
-  Label(go_profile_wind, text="Victories: {}/5".format(wallets['data']['victory'])).grid(row=2,sticky = W)
+  Label(go_profile_wind, text="Rare Tokens: {}".format(wallets['data']['hard'])).grid(row=2,sticky = W)
+  Label(go_profile_wind, text="Victories: {}/5".format(wallets['data']['victory'])).grid(row=3,sticky = W)
   freecrateFrame = Frame(go_profile_wind)
   freecrateFrame.grid(row=4,sticky = W)
   if wallets['data']['victory'] == 5:
