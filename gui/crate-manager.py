@@ -231,6 +231,8 @@ def go_profile():
         content = item['title']+ " - Permanent"
       elif 'consumable' in item['reward']['item'].values() or 'consumable' in item['reward']['item']:
         content = item['title']+ " - Amount: {}".format(item['count'])
+      elif 'regular' in item['reward']['item'].values() or 'regular' in item['reward']['item']:
+        content = item['title']
       else:
         content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
     messagebox.showinfo("Free crate opened", "Content: \n{}".format(content))
