@@ -19,7 +19,7 @@ import lxml.html
 from tkinter import *
 from tkinter import ttk,simpledialog,messagebox
 from functools import partial
-
+dir_path = os.path.dirname(os.path.realpath(__file__))
 s = requests.Session()
 __currentOperation = "Gorgona"
 
@@ -535,8 +535,8 @@ email = StringVar() #Email variable
 password = StringVar() #Password variable
 LoginType = StringVar() # select login service, at the time only steam, mygames and mailru
 
-if os.path.isfile('./creds.json'):
-  with open('creds.json','r') as json_file:
+if os.path.isfile('{}/creds.json'.format(dir_path)):
+  with open('{}/creds.json'.format(dir_path),'r') as json_file:
     CREDS = json.load(json_file)
   try:
     LoginType.set(CREDS['LoginType'])
