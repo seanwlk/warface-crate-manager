@@ -147,12 +147,13 @@ def configWindow():
   Radiobutton(_freeCrateOpenSelector, text="On", variable=v_freeCrateOpen, value=1).grid(row=0,column=0,sticky = W)
   Radiobutton(_freeCrateOpenSelector, text="Off", variable=v_freeCrateOpen, value=0).grid(row=0,column=1,sticky = W)
   
+  ''' # Notifications don't show up with compiled executable, problem with PyInstaller
   Label(confFrame, text="Notifications").grid(row=3,column=0,sticky = W)
   _notificationsSelector = Frame(confFrame)
   _notificationsSelector.grid(row=3, column=1,sticky = E)
   Radiobutton(_notificationsSelector, text="On", variable=v_notifications, value=1).grid(row=0,column=0,sticky = W)
   Radiobutton(_notificationsSelector, text="Off", variable=v_notifications, value=0).grid(row=0,column=1,sticky = W)
-  
+  '''
   Label(config_window).grid(row=1,column=0,sticky = W)
   Button(config_window, bd =2,text='Save',command=saveConf).grid(row=2,column=0,columnspan=6,sticky = S)
   config_window.bind('<Return>',saveConf)
