@@ -2,9 +2,9 @@
  # -*- coding: utf-8 -*-
 
 __author__ = "seanwlk"
-__copyright__ = "Copyright 2019"
+__copyright__ = "Copyright 2020"
 __license__ = "GPL"
-__version__ = "1.96"
+__version__ = "1.97"
 
 import sys, os
 import datetime,time
@@ -21,7 +21,14 @@ from tkinter import ttk,simpledialog,messagebox
 from functools import partial
 dir_path = os.path.dirname(os.path.realpath(__file__))
 s = requests.Session()
+
+### GLOBAL CONFIGS
 __currentOperation = "Gorgona"
+autoCrateOpen = None
+checkTaskCompletion = None
+freeCrateOpen = None
+notifications = None
+### GLOBAL CONFIGS
 
 def check_for_updates(silent=False):
   def update():
@@ -51,6 +58,91 @@ def check_for_updates(silent=False):
   else:
     if not silent:
       messagebox.showinfo("No updates available","You are currently running the latest version of the project.")
+
+def loadConfigs(c,creds=True,save=False):
+  if not creds:
+    pass
+  elif 'configs' in c:
+    c = c['configs']
+  else:
+    # configs are missing for some reason, setting
+    # default ones and saving creds.json
+    t = {
+      "autoCrateOpen" : True,
+      "checkTaskCompletion" : True,
+      "freeCrateOpen" : False,
+      "notifications" : False
+    }
+    c['configs'] = t
+    with open('{}/creds.json'.format(dir_path),'w') as json_file:
+      json.dump(c, json_file, indent=4, sort_keys=True)
+    c = c['configs']
+  global autoCrateOpen
+  global checkTaskCompletion
+  global freeCrateOpen
+  global notifications
+  autoCrateOpen = c['autoCrateOpen']
+  checkTaskCompletion = c['checkTaskCompletion']
+  freeCrateOpen = c['freeCrateOpen']
+  notifications = c['notifications']
+  if save:
+    with open('{}/creds.json'.format(dir_path),'r') as json_file:
+      TMP = json.load(json_file)
+    TMP['configs'] = c
+    with open('{}/creds.json'.format(dir_path),'w') as json_file:
+      json.dump(TMP, json_file, indent=4, sort_keys=True)
+
+def configWindow():
+  def saveConf(*args):
+    c = {
+      "autoCrateOpen" : True if v_autoCrateOpen.get() == 1 else False,
+      "checkTaskCompletion" : True if v_checkTaskCompletion.get() == 1 else False,
+      "freeCrateOpen" : True if v_freeCrateOpen.get() == 1 else False,
+      "notifications" : True if v_notifications.get() == 1 else False
+    }
+    loadConfigs(c,creds=False,save=True)
+    config_window.destroy()
+  config_window = Tk()
+  config_window.title("Config")
+  config_window.resizable(False, False)
+  config_window.geometry("250x170")
+
+  # TK vars for configs
+  v_autoCrateOpen = IntVar(master=config_window)
+  v_checkTaskCompletion = IntVar(master=config_window)
+  v_freeCrateOpen = IntVar(master=config_window)
+  v_notifications = IntVar(master=config_window)
+  v_autoCrateOpen.set(1) if autoCrateOpen else v_autoCrateOpen.set(0)
+  v_checkTaskCompletion.set(1) if checkTaskCompletion else v_checkTaskCompletion.set(0)
+  v_freeCrateOpen.set(1) if freeCrateOpen else v_freeCrateOpen.set(0)
+  v_notifications.set(1) if notifications else v_notifications.set(0)
+
+  confFrame = ttk.Labelframe(config_window, text='Configuration panel')
+  confFrame.grid(row=0,columnspan=6,sticky=W)
+
+  Label(confFrame, text="Auto open crates").grid(row=0,column=0,sticky = W)
+  _autoCrateOpenSelector = Frame(confFrame)
+  _autoCrateOpenSelector.grid(row=0, column=1,sticky = E)
+  Radiobutton(_autoCrateOpenSelector, text="On", variable=v_autoCrateOpen, value=1).grid(row=0,column=0,sticky = W)
+  Radiobutton(_autoCrateOpenSelector, text="Off", variable=v_autoCrateOpen, value=0).grid(row=0,column=1,sticky = W)
+
+  Label(confFrame, text="Check task completion").grid(row=1,column=0,sticky = W)
+  _checkTaskCompletionSelector = Frame(confFrame)
+  _checkTaskCompletionSelector.grid(row=1, column=1,sticky = E)
+  Radiobutton(_checkTaskCompletionSelector, text="On", variable=v_checkTaskCompletion, value=1).grid(row=0,column=0,sticky = W)
+  Radiobutton(_checkTaskCompletionSelector, text="Off", variable=v_checkTaskCompletion, value=0).grid(row=0,column=1,sticky = W)
+
+  Label(confFrame, text="Gorgona free crate opener").grid(row=2,column=0,sticky = W)
+  _freeCrateOpenSelector = Frame(confFrame)
+  _freeCrateOpenSelector.grid(row=2, column=1,sticky = E)
+  Radiobutton(_freeCrateOpenSelector, text="On", variable=v_freeCrateOpen, value=1).grid(row=0,column=0,sticky = W)
+  Radiobutton(_freeCrateOpenSelector, text="Off", variable=v_freeCrateOpen, value=0).grid(row=0,column=1,sticky = W)
+  
+  Label(config_window).grid(row=1,column=0,sticky = W)
+  Button(config_window, bd =2,text='Save',command=saveConf).grid(row=2,column=0,columnspan=6,sticky = S)
+  config_window.bind('<Return>',saveConf)
+
+  config_window.mainloop()
 
 def resources():
   print("Opening available resources window")
@@ -208,11 +300,11 @@ def daily_tasks():
     Label(taskFrame,text="Progress: {progress}/{target_count}".format(**task)).grid(row=1,sticky = W)
     hr=Frame(tableFrame,height=1,width=730,bg="black")
     hr.grid(row=index,columnspan=3,sticky = S)
-    
+
     rewardFrame = Frame(tableFrame,borderwidth=0,relief=GROOVE,highlightthickness=0,highlightcolor="light grey")
     rewardFrame.grid(row=index,column=1,sticky = W)
     Label(rewardFrame,text="{}".format(showRewards(task['rewards'])),justify=LEFT).grid(row=0,rowspan=2,column=1,sticky = W)
-    
+
     statusFrame = Frame(tableFrame,borderwidth=0,relief=GROOVE,highlightthickness=0,highlightcolor="light grey")
     statusFrame.grid(row=index,column=2,sticky = W)
     if task['is_complete']:
@@ -258,47 +350,70 @@ def main_app():
   def append_out_text(text):
     out_text.configure(state='normal')
     out_text.insert(END,"\n{}".format(text))
+    out_text.see("end")
     out_text.configure(state='disabled')
   def check_crates():
-    main_json = s.get("https://{}/minigames/craft/api/user-info".format(base_url)).json()
-    if len(main_json['data']['user_chests']) != 0:
-      for chest in main_json['data']['user_chests']:
-        if str(chest['state']) == 'new':
-          get_mg_token()
-          url = "https://{}/minigames/craft/api/start".format(base_url)
-          data_start_opening = {
-            'chest_id':chest['id']
-            }
-          req = s.post(url,data=data_start_opening).json()
-          if req['state'] == "Success":
-            append_out_text("[{actiontime}] New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
-        elif chest['ended_at'] < 0:
-          get_mg_token()
-          data_to_open = {
-            'chest_id':chest['id'],
-            'paid':0
-            }
-          url = "https://{}/minigames/craft/api/open".format(base_url)
-          req = s.post(url,data=data_to_open)
-          to_open_json = json.loads(req.text)
-          append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
-    app.after(30000,check_crates)
+    if autoCrateOpen:
+      main_json = s.get("https://{}/minigames/craft/api/user-info".format(base_url)).json()
+      if len(main_json['data']['user_chests']) != 0:
+        for chest in main_json['data']['user_chests']:
+          if str(chest['state']) == 'new':
+            get_mg_token()
+            url = "https://{}/minigames/craft/api/start".format(base_url)
+            data_start_opening = {
+              'chest_id':chest['id']
+              }
+            req = s.post(url,data=data_start_opening).json()
+            if req['state'] == "Success":
+              append_out_text("[{actiontime}] New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
+          elif chest['ended_at'] < 0:
+            get_mg_token()
+            data_to_open = {
+              'chest_id':chest['id'],
+              'paid':0
+              }
+            url = "https://{}/minigames/craft/api/open".format(base_url)
+            req = s.post(url,data=data_to_open)
+            to_open_json = json.loads(req.text)
+            append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
+    app.after(30000,check_crates) # Every 30 seconds
 
   global task_history
   task_history = {}
   def check_tasks():
-    temp = {}
-    get_mg_token()
-    req = s.get("https://{url}/minigames/battlepass/task/all".format(url=base_url)).json()
-    for j, task in enumerate(req['data']):
-      temp[j] = (task['is_complete'] == False)
-      global task_history
-      if task_history == {}:
-        continue
-      if temp[j] != task_history[j]:
-        append_out_text("[{actiontime}] Task Completed : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=task['title']))
-    task_history = temp
-    app.after(60000, check_tasks)
+    if checkTaskCompletion:
+      temp = {}
+      get_mg_token()
+      req = s.get("https://{url}/minigames/battlepass/task/all".format(url=base_url)).json()
+      for j, task in enumerate(req['data']):
+        temp[j] = (task['is_complete'] == False)
+        global task_history
+        if task_history == {}:
+          continue
+        if temp[j] != task_history[j]:
+          append_out_text("[{actiontime}] Task Completed : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=task['title']))
+      task_history = temp
+    app.after(60000, check_tasks) # Every minute
+
+  def checkFreeCrate():
+    if freeCrateOpen:
+      wallets = s.get("https://{}/minigames/battlepass/wallets".format(base_url)).json()
+      if wallets['data']['victory'] == 5:
+        req = s.post("https://{}/minigames/battlepass/box/open".format(base_url),data={"id":5,"count":1,"currency":3}).json()
+        if len(req['data']) == 0:
+          content = "There were no rewards in this crate" # Is this possible?
+        else:
+          item = req['data'][0]
+          if 'permanent' in item['reward']['item'].values() or 'permanent' in item['reward']['item']:
+            content = item['title']+ " - Permanent"
+          elif 'consumable' in item['reward']['item'].values() or 'consumable' in item['reward']['item']:
+            content = item['title']+ " - Amount: {}".format(item['count'])
+          elif 'regular' in item['reward']['item'].values() or 'regular' in item['reward']['item']:
+            content = item['title']
+          else:
+            content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
+        append_out_text("[{actiontime}] Free box opened : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=content))
+    app.after(300000, checkFreeCrate) # Every 5 minutes
 
   print("Opening Main app")
   login_window.destroy()
@@ -316,6 +431,7 @@ def main_app():
   menubar.add_command(label="Crates", command=crates)
   menubar.add_command(label="About", command=about_window)
   menubar.add_command(label="Update", command=check_for_updates)
+  menubar.add_command(label="Config", command=configWindow)
   # display the menu
   app.config(menu=menubar)
 
@@ -326,6 +442,7 @@ def main_app():
   app.after(30000,check_crates)
   task_history = {}
   app.after(20000, check_tasks)
+  app.after(25000, checkFreeCrate)
   app.mainloop()
 
 def about_window():
@@ -503,8 +620,9 @@ def login(event=None):
       CREDS[LoginType.get()] = {}
   CREDS[LoginType.get()]['email'] = email.get()
   CREDS[LoginType.get()]['password'] = password.get()
-  with open('creds.json','w') as json_file:
+  with open('{}/creds.json'.format(dir_path),'w') as json_file:
     json.dump(CREDS, json_file, indent=4, sort_keys=True)
+  loadConfigs(CREDS)
   if LoginType.get() == "mygames":
     print ("Login as My.games")
     base_url = "pc.warface.com"
