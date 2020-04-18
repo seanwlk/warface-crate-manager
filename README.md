@@ -10,6 +10,7 @@ New version with GUI and simple usage for users that don't know how to setup pyt
 - Python `requests` module
 - Python `steam` module
 - Python `lxml` module
+- Python `win10toast` module
 - 3 minutes to config
 - Brain
 
@@ -34,10 +35,14 @@ Just open your browser and go to wf.mail.ru, it will redirect you to the mail.ru
 ![Crates](https://i.imgur.com/g9DChMx.png)
 #### Resource viewer
 ![Resources](https://i.imgur.com/aJY43Id.png)
-#### Armageddon profile
-![Profile](https://i.imgur.com/umQHMsP.png)
-#### Armageddon week viewer
+#### Blobal operation menu
+Note that this may change from one battlepass to another. I always try to use the same templates but they always change something.
 ![Weeks](https://i.imgur.com/uq7G5Uf.png)
+#### Notifications
+You can turn on notifications from configuration menu if you want. (It's turned off by default)
+![notifs](https://i.imgur.com/nU1S5mI.jpg)
+![notifs1](https://i.imgur.com/YbxKHEn.png)
+![notifs2](https://i.imgur.com/imq80dW.png)
 
 # Credits
 - Original project and design - [@seanwlk](https://github.com/seanwlk)
