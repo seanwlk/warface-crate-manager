@@ -19,6 +19,8 @@ import lxml.html
 from tkinter import *
 from tkinter import ttk,simpledialog,messagebox
 from functools import partial
+from plyer import notification
+from plyer import platforms
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 s = requests.Session()
@@ -29,7 +31,20 @@ autoCrateOpen = None
 checkTaskCompletion = None
 freeCrateOpen = None
 notifications = None
+if os.path.isfile('C:\MyGames\Warface My.Com\GameIcon.ico'):
+  appIcon = 'C:\MyGames\Warface My.Com\GameIcon.ico'
+elif os.path.isfile('C:\MyGames\Warface\GameIcon.ico'):
+  appIcon = 'C:\MyGames\Warface My.Com\GameIcon.ico'
+elif os.path.isfile('C:\GamesMailRu\Warface\GameIcon.ico'):
+  appIcon = 'C:\GamesMailRu\Warface\GameIcon.ico'
+else:
+  appIcon = None
 ### GLOBAL CONFIGS
+
+def notificationSender(title,body):
+  if notifications:
+    notification.notify(title=title, message=body, app_name='Warface Crate Manager', app_icon=appIcon, timeout=5, ticker='', toast=False)
+  return
 
 def check_for_updates(silent=False):
   def update():
@@ -138,14 +153,13 @@ def configWindow():
   _freeCrateOpenSelector.grid(row=2, column=1,sticky = E)
   Radiobutton(_freeCrateOpenSelector, text="On", variable=v_freeCrateOpen, value=1).grid(row=0,column=0,sticky = W)
   Radiobutton(_freeCrateOpenSelector, text="Off", variable=v_freeCrateOpen, value=0).grid(row=0,column=1,sticky = W)
-  
-  ''' # Notifications don't show up with compiled executable, problem with PyInstaller
+
   Label(confFrame, text="Notifications").grid(row=3,column=0,sticky = W)
   _notificationsSelector = Frame(confFrame)
   _notificationsSelector.grid(row=3, column=1,sticky = E)
   Radiobutton(_notificationsSelector, text="On", variable=v_notifications, value=1).grid(row=0,column=0,sticky = W)
   Radiobutton(_notificationsSelector, text="Off", variable=v_notifications, value=0).grid(row=0,column=1,sticky = W)
-  '''
+
   Label(config_window).grid(row=1,column=0,sticky = W)
   Button(config_window, bd =2,text='Save',command=saveConf).grid(row=2,column=0,columnspan=6,sticky = S)
   config_window.bind('<Return>',saveConf)
@@ -374,6 +388,7 @@ def main_app():
             req = s.post(url,data=data_start_opening).json()
             if req['state'] == "Success":
               append_out_text("[{actiontime}] New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
+              notificationSender("New crate","You received a {} crate".format(chest['type']))
           elif chest['ended_at'] < 0:
             get_mg_token()
             data_to_open = {
@@ -384,6 +399,7 @@ def main_app():
             req = s.post(url,data=data_to_open)
             to_open_json = json.loads(req.text)
             append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
+            notificationSender("{} crate opened".format(chest['type']),"Level: {level}\nAmount: {amount}".format(level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
     app.after(30000,check_crates) # Every 30 seconds
 
   global task_history
@@ -400,6 +416,7 @@ def main_app():
           continue
         if temp[j] != task_history[j]:
           append_out_text("[{actiontime}] Task Completed : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=task['title']))
+          notificationSender("Task Completed","{}".format(task['title']))
       task_history = temp
     app.after(60000, check_tasks) # Every minute
 
@@ -421,6 +438,7 @@ def main_app():
           else:
             content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
         append_out_text("[{actiontime}] Free box opened : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=content))
+        notificationSender("Free box opened","Reward: {}".format(content))
     app.after(300000, checkFreeCrate) # Every 5 minutes
 
   print("Opening Main app")
@@ -543,6 +561,7 @@ def steam_login():
     except:
       continue
     break
+  notificationSender("Crate Manager","Logged in with Steam profile")
   main_app()
 
 def mygames_login():
@@ -585,6 +604,7 @@ def mygames_login():
     except:
       continue
     break
+  notificationSender("Crate Manager","Logged in with My.Games profile")
   main_app()
 
 def mailru_login():
@@ -602,6 +622,7 @@ def mailru_login():
     'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
     }
   s.get('https://auth.mail.ru/cgi-bin/auth?Login={mail}&Password={pwd}&FakeAuthPage=https%3A%2F%2Fwf.mail.ru%2Fauth'.format(mail=email.get(),pwd=password.get()))
+  notificationSender("Crate Manager","Logged in with Mail.Ru profile")
   main_app()
 
 def op_lang(*args):

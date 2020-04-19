@@ -120,6 +120,7 @@ venv.bak/
 .dmypy.json
 dmypy.json
 creds.json
+build.bat
 
 # Pyre type checker
 .pyre/
