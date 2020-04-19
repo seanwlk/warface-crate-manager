@@ -19,7 +19,6 @@ import lxml.html
 from tkinter import *
 from tkinter import ttk,simpledialog,messagebox
 from functools import partial
-from win10toast import ToastNotifier
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 s = requests.Session()
@@ -31,13 +30,6 @@ checkTaskCompletion = None
 freeCrateOpen = None
 notifications = None
 ### GLOBAL CONFIGS
-
-def notificationSender(title,body):
-  if notifications:
-    toaster = ToastNotifier()
-    toaster.show_toast(title,body,icon_path=None,duration=4,threaded=True)
-    while toaster.notification_active(): time.sleep(0.1)
-  return
 
 def check_for_updates(silent=False):
   def update():
@@ -382,7 +374,6 @@ def main_app():
             req = s.post(url,data=data_start_opening).json()
             if req['state'] == "Success":
               append_out_text("[{actiontime}] New {chest_type} crate available! {start_result} opening, ID: {chestid}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],start_result=req['state'],chestid=req['data']['id']))
-              notificationSender("New crate","You received a {} crate".format(chest['type']))
           elif chest['ended_at'] < 0:
             get_mg_token()
             data_to_open = {
@@ -393,7 +384,6 @@ def main_app():
             req = s.post(url,data=data_to_open)
             to_open_json = json.loads(req.text)
             append_out_text("[{actiontime}] {chest_type} crate opening...\n    Content -> Level: {level} | Amount: {amount}".format(actiontime=time.strftime('%b %d %T'),chest_type=chest['type'],level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
-            notificationSender("{} crate opened".format(chest['type']),"Level: {level}\nAmount: {amount}".format(level=to_open_json['data']['resource']['level'],amount=to_open_json['data']['resource']['amount']))
     app.after(30000,check_crates) # Every 30 seconds
 
   global task_history
@@ -410,7 +400,6 @@ def main_app():
           continue
         if temp[j] != task_history[j]:
           append_out_text("[{actiontime}] Task Completed : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=task['title']))
-          notificationSender("Task Completed","{}".format(task['title']))
       task_history = temp
     app.after(60000, check_tasks) # Every minute
 
@@ -432,7 +421,6 @@ def main_app():
           else:
             content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
         append_out_text("[{actiontime}] Free box opened : {description}".format(actiontime=str(time.strftime('%b %d %X')),description=content))
-        notificationSender("Free box opened","Reward: {}".format(content))
     app.after(300000, checkFreeCrate) # Every 5 minutes
 
   print("Opening Main app")
@@ -528,7 +516,7 @@ def steam_login():
       tfa_code = simpledialog.askstring("2 Factor", "CODE",parent=login_window)
       user.login(twofactor_code=tfa_code)
     # Save auth token for later session restore
-    with open('creds.json','w') as json_file:
+    with open('{}/creds.json'.format(dir_path),'w') as json_file:
       CREDS['steam']['auth_token'] = user.oauth_token
       CREDS['steam']['steamguard_token'] = "{id}||{token}".format(id=user.steam_id.as_64, token=user.session.cookies.get_dict()["steamMachineAuth{id}".format(id=user.steam_id.as_64)])
       json.dump(CREDS, json_file, indent=4, sort_keys=True)
@@ -555,7 +543,6 @@ def steam_login():
     except:
       continue
     break
-  notificationSender("Crate Manager","Logged in with Steam profile")
   main_app()
 
 def mygames_login():
@@ -598,7 +585,6 @@ def mygames_login():
     except:
       continue
     break
-  notificationSender("Crate Manager","Logged in with My.games profile")
   main_app()
 
 def mailru_login():
@@ -616,7 +602,6 @@ def mailru_login():
     'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
     }
   s.get('https://auth.mail.ru/cgi-bin/auth?Login={mail}&Password={pwd}&FakeAuthPage=https%3A%2F%2Fwf.mail.ru%2Fauth'.format(mail=email.get(),pwd=password.get()))
-  notificationSender("Crate Manager","Logged in with Mail.ru profile")
   main_app()
 
 def op_lang(*args):
