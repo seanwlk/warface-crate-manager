@@ -1,4 +1,4 @@
-# Warface Automatic Crate Manager
+# Warface Crate Manager
 Python script that automatically opens new crates for you and avoids you missclicking on wrong buttons that make you spend BattlePoints for no reason (which is the main reason this script was designed for).
 New version with GUI and simple usage for users that don't know how to setup python enviroment.
 
@@ -8,9 +8,8 @@ New version with GUI and simple usage for users that don't know how to setup pyt
 - Python3
 - Tkinter
 - Python `requests` module
-- Python `steam` module
-- Python `lxml` module
-- Python `win10toast` module
+- Python `wfaccountmanager` module
+- Python `plyer` module
 - 3 minutes to config
 - Brain
 
@@ -46,4 +45,9 @@ Just open your browser and go to wf.mail.ru, it will redirect you to the mail.ru
 
 # Credits
 - Original project and design - [@seanwlk](https://github.com/seanwlk)
-- Steam support - [@sumfun4WF](https://github.com/sumfun4WF) / [@harmdhast](https://github.com/harmdhast)
+- Original steam support and inspiration - [@sumfun4WF](https://github.com/sumfun4WF) / [@harmdhast](https://github.com/harmdhast)
+
+## Donate
+Please consider donating to support the project. It takes time to develop such apps during my free time.
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/seanwlk)
