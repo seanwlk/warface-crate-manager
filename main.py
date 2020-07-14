@@ -69,7 +69,7 @@ class WFCrateManager:
     self.accountManager = WFAccountManager(region,lang=lang)
     if region == "steam":
       return self._steamloginHandler(account,password,lang)
-    else:  
+    else:
       self.accountManager.login(account,password)
       self.user = self.accountManager.me
       self.master.destroy()
@@ -91,7 +91,7 @@ class WFCrateManager:
         return None
     d = self.accountManager.login(account,password)
     if d['status'] == 0:
-      pass
+      oauth2 = False
     elif d['status'] == 1:
       captcha_code = simpledialog.askstring("Captcha Code", "{}".format(d['url']),parent=self.master)
       oauth2 = self.accountManager.postSteam2FA(captcha_code)
@@ -102,14 +102,14 @@ class WFCrateManager:
       tfa_code = simpledialog.askstring("2 Factor", "CODE",parent=self.master)
       oauth2 = self.accountManager.postSteam2FA(tfa_code)
     self.user = self.accountManager.me
-    self.master.destroy()
-    self.renderApp()
     self.configs.set("region","steam")
     if oauth2:
       self.configs.set("steam",{"email":account,"password":password,"steamID":oauth2['steam']['steamID'],"auth_token":oauth2['steam']['auth_token'],"steamguard_token":oauth2['steam']['steamguard_token']})
     else:
       self.configs.set("steam",{"email":account,"password":password})
     self.configs.set("lang",lang)
+    self.master.destroy()
+    self.renderApp()
 
 def main():
   root = tk.Tk()
