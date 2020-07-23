@@ -22,8 +22,8 @@ class WFCrateManager:
   def __init__(self, master):
     self.master = master
     self.configs = configManager(os.path.dirname(os.path.realpath(__file__)))
-    self.appVersion = "2.0"
-    self._currentBattlepass = "Gorgona"
+    self.appVersion = "2.1"
+    self._currentBattlepass = "Dark Samurai"
     LoginWindow(master,self)
     # App Windows
     self.configWindow = _ConfigWindow(self)
@@ -54,6 +54,7 @@ class WFCrateManager:
     self.out_text.pack()
     self.consoleLog(f"Logged in as {self.user['username']}")
     self.update.check(silent=True)
+    self.hasBattlePass = self.checkHasPass()
     # Routines
     self.routines = routineManager(self,self.app)
     self.routines.checkCrates()
@@ -110,6 +111,11 @@ class WFCrateManager:
     self.configs.set("lang",lang)
     self.master.destroy()
     self.renderApp()
+  def checkHasPass(self):
+    r = self.accountManager.get("https://$baseurl$/minigames/battlepass/user/info")
+    if r['data']['status'] == "member":
+      return True
+    return False
 
 def main():
   root = tk.Tk()

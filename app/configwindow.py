@@ -10,7 +10,7 @@ class _ConfigWindow:
     self.window = tk.Tk()
     self.window.title("Config")
     self.window.resizable(False, False)
-    self.window.geometry("250x170")
+    self.window.geometry("240x170")
     self.v_autoCrateOpen = tk.IntVar(master=self.window)
     self.v_checkTaskCompletion = tk.IntVar(master=self.window)
     self.v_freeCrateOpen = tk.IntVar(master=self.window)
@@ -23,11 +23,11 @@ class _ConfigWindow:
     if "checkTaskCompletion" in self.app.configs.get("configs"):
       self.v_checkTaskCompletion.set(self._boolToInt(self.app.configs.get("configs")['checkTaskCompletion']))
     else:
-      self.v_autoCrateOpen.set(0)
+      self.v_checkTaskCompletion.set(0)
     if "freeCrateOpen" in self.app.configs.get("configs"):
       self.v_freeCrateOpen.set(self._boolToInt(self.app.configs.get("configs")['freeCrateOpen']))
     else:
-      self.v_autoCrateOpen.set(0)
+      self.v_freeCrateOpen.set(0)
     if "notifications" in self.app.configs.get("configs"):
       self.v_notifications.set(self._boolToInt(self.app.configs.get("configs")['notifications']))
     else:
@@ -48,7 +48,7 @@ class _ConfigWindow:
     tk.Radiobutton(_checkTaskCompletionSelector, text="On", variable=self.v_checkTaskCompletion, value=1).grid(row=0,column=0,sticky = tk.W)
     tk.Radiobutton(_checkTaskCompletionSelector, text="Off", variable=self.v_checkTaskCompletion, value=0).grid(row=0,column=1,sticky = tk.W)
 
-    tk.Label(confFrame, text="Gorgona free crate opener").grid(row=2,column=0,sticky = tk.W)
+    tk.Label(confFrame, text="BP win crate opener").grid(row=2,column=0,sticky = tk.W)
     _freeCrateOpenSelector = tk.Frame(confFrame)
     _freeCrateOpenSelector.grid(row=2, column=1,sticky = tk.E)
     tk.Radiobutton(_freeCrateOpenSelector, text="On", variable=self.v_freeCrateOpen, value=1).grid(row=0,column=0,sticky = tk.W)

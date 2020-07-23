@@ -19,9 +19,10 @@ class routineManager:
     self.window.after(30000,self.checkCrates)
   def checkFreeCrate(self):
     if self.app.configs.get("configs")['freeCrateOpen']:
+
       wallets = self.app.accountManager.get("https://$baseurl$/minigames/battlepass/wallets")
       if wallets['data']['victory'] >= 5:
-        req = self.app.accountManager.post("https://$baseurl$/minigames/battlepass/box/open",data={"id":5,"count":1,"currency":3})
+        req = self.app.accountManager.post("https://$baseurl$/minigames/battlepass/box/open",data={"id":6,"count":1,"currency":3})
         if len(req['data']) == 0:
           content = "There were no rewards in this crate" # Is this possible?
         else:
@@ -34,8 +35,24 @@ class routineManager:
             content = item['title']
           else:
             content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
-        self.app.consoleLog(f"Free box opened : {content}")
-        self.app.notif.send("Free box opened",f"Reward: {content}")
+        self.app.consoleLog(f"Free win box opened : {content}")
+        self.app.notif.send("Free win box opened",f"Reward: {content}")
+      if self.app.hasBattlePass and wallets['data']['victory_vip'] >= 5:
+        req = self.app.accountManager.post("https://$baseurl$/minigames/battlepass/box/open",data={"id":5,"count":1,"currency":4})
+        if len(req['data']) == 0:
+          content = "There were no rewards in this crate" # Is this possible?
+        else:
+          item = req['data'][0]
+          if 'permanent' in item['reward']['item'].values() or 'permanent' in item['reward']['item']:
+            content = item['title']+ " - Permanent"
+          elif 'consumable' in item['reward']['item'].values() or 'consumable' in item['reward']['item']:
+            content = item['title']+ " - Amount: {}".format(item['count'])
+          elif 'regular' in item['reward']['item'].values() or 'regular' in item['reward']['item']:
+            content = item['title']
+          else:
+            content = item['title']+ " - {0} {1}".format(item['reward']['item']['duration'],item['reward']['item']['duration_type'])
+        self.app.consoleLog(f"VIP win box opened : {content}")
+        self.app.notif.send("VIP win box opened",f"Reward: {content}")
     self.window.after(300000,self.checkFreeCrate)
   def checkTasks(self):
     if self.app.configs.get("configs")['checkTaskCompletion']:
