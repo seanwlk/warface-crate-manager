@@ -1,0 +1,3 @@
+requests>=2.23.0
+wfaccountmanager>=0.0.5
+plyer==1.4.3
