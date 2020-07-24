@@ -12,6 +12,7 @@ from app.update import updateManager
 from app.loginwindow import LoginWindow
 from app.configwindow import _ConfigWindow
 from app.bpprofile import _bpProfileWindow
+from app.seasonshop import _seasonalShopWindow
 from app.bptasks import _bpTasksWindow
 from app.resources import _resourcesWindow
 from app.crates import _cratesWindow
@@ -22,12 +23,13 @@ class WFCrateManager:
   def __init__(self, master):
     self.master = master
     self.configs = configManager(os.path.dirname(os.path.realpath(__file__)))
-    self.appVersion = "2.1"
+    self.appVersion = "2.2"
     self._currentBattlepass = "Dark Samurai"
     LoginWindow(master,self)
     # App Windows
     self.configWindow = _ConfigWindow(self)
     self.bpProfile = _bpProfileWindow(self)
+    self.seasonShop = _seasonalShopWindow(self)
     self.bpTasks = _bpTasksWindow(self)
     self.resources = _resourcesWindow(self)
     self.crates = _cratesWindow(self)
@@ -44,6 +46,7 @@ class WFCrateManager:
     self.menubar.add_cascade(label=self._currentBattlepass, menu=bp)
     bp.add_command(label="Profile", command=lambda:self.bpProfile.show())
     bp.add_command(label="Daily Tasks", command=lambda:self.bpTasks.show())
+    bp.add_command(label="Seasonal Shop", command=lambda:self.seasonShop.show())
     self.menubar.add_command(label="Resources", command=lambda:self.resources.show())
     self.menubar.add_command(label="Crates", command=lambda:self.crates.show())
     self.menubar.add_command(label="About", command=lambda:self.about.show())
