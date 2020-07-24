@@ -9,7 +9,7 @@ class _bpTasksWindow:
     self.window = tk.Tk()
     self.window.title("Battlepass tasks")
     self.window.resizable(True, True)
-    self.window.geometry("790x575")
+    self.window.geometry("800x575")
     missionList = VerticalScrolledFrame(self.window)
     missionList.pack(fill="x", expand=True)
     tasks = self.app.accountManager.get("https://$baseurl$/minigames/battlepass/task/all")
@@ -18,15 +18,15 @@ class _bpTasksWindow:
     tk.Label(tableFrame, text="Task").grid(row=0, column=0, sticky=tk.W)
     tk.Label(tableFrame, text="Rewards").grid(row=0, column=1, sticky=tk.W)
     tk.Label(tableFrame, text="Status").grid(row=0, column=2, sticky=tk.W)
-    hr = tk.Frame(tableFrame, height=1, width=750, bg="black")
+    hr = tk.Frame(tableFrame, height=1, width=770, bg="black")
     hr.grid(row=0, columnspan=3, sticky=tk.S)
     for index, task in enumerate(tasks['data']):
       index+=1
       taskFrame = tk.Frame(tableFrame, borderwidth=0, relief=tk.GROOVE, highlightthickness=0, highlightcolor="light grey")
       taskFrame.grid(row=index, column=0, sticky=tk.W)
-      tk.Label(taskFrame,text=f"{task['title']}").grid(row=0, sticky=tk.W)
+      tk.Label(taskFrame,text=f"{task['title']}", wraplength=420, justify=tk.LEFT).grid(row=0, sticky=tk.W)
       tk.Label(taskFrame,text="Progress: {progress}/{target_count}".format(**task)).grid(row=1, sticky=tk.W)
-      hr = tk.Frame(tableFrame, height=1, width=730, bg="black")
+      hr = tk.Frame(tableFrame, height=1, width=770, bg="black")
       hr.grid(row=index, columnspan=3, sticky=tk.S)
 
       rewardFrame = tk.Frame(tableFrame, borderwidth=0, relief=tk.GROOVE, highlightthickness=0, highlightcolor="light grey")
