@@ -35,7 +35,14 @@ class LoginWindow:
     self.master.bind('<Return>',self.login)
     self.loginSelected() # Load creds on first run
   def login(self,*args):
-    self.app.login(self.region.get(),self.lang.get(),self.account.get(),self.password.get())
+    langDict = {
+      "English" : "en",
+      "Français" : "fr",
+      "Deutsch" : "de",
+      "Russian" : "ru",
+      "中文" : "cn"
+    }
+    self.app.login(self.region.get(),langDict[self.lang.get()],self.account.get(),self.password.get())
   def loginSelected(self,*args):
     try:
       self.account.set(self.app.configs.get(self.region.get())['email'])
